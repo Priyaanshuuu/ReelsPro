@@ -19,8 +19,8 @@ export async function dbConnect() {
 
     if(!cached.promise){
         const opts = {
-            bufferCommands: true,
-            maxPoolSize: 10,
+            bufferCommands: true,// This code is used to handle the request to the database when the connection is not established
+            maxPoolSize: 10,// This code is used to limit the number of connections with the database at a time
         };
         cached.promise = mongoose
         .connect(MONGO_URL, opts)
