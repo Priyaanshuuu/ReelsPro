@@ -1,6 +1,6 @@
 import { NextRequest,NextResponse } from "next/server";
 import { dbConnect } from "@/app/lib/db";
-import {User} from "@/models/User.model.ts";
+import User from "@/models/User.model"
 
 export async function POST(request: NextRequest){
     try {
@@ -34,6 +34,7 @@ export async function POST(request: NextRequest){
         );
     } catch (error) {
         console.log("Register Error",error);
+        
         return NextResponse.json(
             {error:"Failed to register user"},
             {status: 500}
