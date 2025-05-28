@@ -47,6 +47,7 @@ export const authOptions : NextAuthOptions= {
 
         })
     ],
+// providers here means 
     callbacks:{
         async jwt({token,user}){
             if(user){
