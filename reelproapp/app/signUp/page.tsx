@@ -10,35 +10,35 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { Github, Mail } from 'lucide-react';
 
-export default function LoginPage() {
+export default function SignupPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   
-  const handleLoginSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSignupSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate login
+    // Simulate signup
     setTimeout(() => {
       setIsLoading(false);
       toast({
-        title: "Login successful",
-        description: "Welcome back to ReelsPro!",
+        title: "Account created",
+        description: "Welcome to ReelsPro!",
       });
       router.push('/feed');
     }, 1000);
   };
   
-  const handleOAuthLogin = (provider: string) => {
+  const handleOAuthSignup = (provider: string) => {
     setIsLoading(true);
     
-    // Simulate OAuth login
+    // Simulate OAuth signup
     setTimeout(() => {
       setIsLoading(false);
       toast({
-        title: `${provider} login successful`,
-        description: "Welcome back to ReelsPro!",
+        title: `${provider} signup successful`,
+        description: "Welcome to ReelsPro!",
       });
       router.push('/feed');
     }, 1000);
@@ -52,9 +52,9 @@ export default function LoginPage() {
             ReelsPro
           </span>
         </div>
-        <h1 className="text-2xl font-bold tracking-tight">Welcome back</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Create an account</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Log in to continue to ReelsPro
+          Join ReelsPro and start sharing your videos
         </p>
       </div>
 
@@ -62,7 +62,7 @@ export default function LoginPage() {
         <Button 
           variant="outline" 
           className="w-full flex items-center justify-center gap-2 h-11"
-          onClick={() => handleOAuthLogin('Google')}
+          onClick={() => handleOAuthSignup('Google')}
           disabled={isLoading}
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24">
@@ -89,7 +89,7 @@ export default function LoginPage() {
         <Button 
           variant="outline" 
           className="w-full flex items-center justify-center gap-2 h-11"
-          onClick={() => handleOAuthLogin('GitHub')}
+          onClick={() => handleOAuthSignup('GitHub')}
           disabled={isLoading}
         >
           <Github className="h-4 w-4" />
@@ -108,7 +108,25 @@ export default function LoginPage() {
         </div>
       </div>
       
-      <form onSubmit={handleLoginSubmit} className="space-y-4">
+      <form onSubmit={handleSignupSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="name">Full Name</Label>
+          <Input 
+            id="name" 
+            placeholder="Enter your name"
+            required
+            disabled={isLoading}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="username">Username</Label>
+          <Input 
+            id="username" 
+            placeholder="Choose a username"
+            required
+            disabled={isLoading}
+          />
+        </div>
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input 
@@ -120,19 +138,11 @@ export default function LoginPage() {
           />
         </div>
         <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="password">Password</Label>
-            <Link 
-              href="/auth/forgot-password" 
-              className="text-xs text-muted-foreground hover:text-foreground"
-            >
-              Forgot password?
-            </Link>
-          </div>
+          <Label htmlFor="password">Password</Label>
           <Input 
             id="password" 
             type="password" 
-            placeholder="••••••••"
+            placeholder="Create a password"
             required
             disabled={isLoading}
           />
@@ -142,15 +152,22 @@ export default function LoginPage() {
           className="w-full h-11"
           disabled={isLoading}
         >
-          {isLoading ? "Logging in..." : "Log in"}
+          {isLoading ? "Creating account..." : "Sign up"}
         </Button>
+        
+        <p className="text-xs text-muted-foreground text-center mt-2">
+          By signing up, you agree to our{" "}
+          <Link href="#" className="text-primary hover:underline">Terms of Service</Link>{" "}
+          and{" "}
+          <Link href="#" className="text-primary hover:underline">Privacy Policy</Link>.
+        </p>
       </form>
       
       <div className="mt-6 text-center text-sm">
         <p className="text-muted-foreground">
-          Don't have an account?{" "}
-          <Link href="/auth/signup" className="text-primary hover:underline">
-            Sign up
+          Already have an account?{" "}
+          <Link href="/auth/login" className="text-primary hover:underline">
+            Log in
           </Link>
         </p>
       </div>
