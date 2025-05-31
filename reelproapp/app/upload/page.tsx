@@ -2,14 +2,14 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/app/components/ui/button';
+import { Input } from '@/app/components/ui/input';
+import { Textarea } from '@/app/components/ui/textarea';
+import { Label } from '@/app/components/ui/label';
+//import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/app/hooks/use-toast';
 import { Upload, Film, Image, X, Loader2 } from 'lucide-react';
-import Navigation from '@/components/navigation';
+import Navigation from '@/app/components/navigation';
 
 export default function UploadPage() {
   const router = useRouter();
@@ -195,8 +195,8 @@ export default function UploadPage() {
                   />
                   <Button
                     type="button"
-                    variant="destructive"
-                    size="icon"
+                    //variant="destructive"
+                    //size="icon"
                     className="absolute top-2 right-2 rounded-full"
                     onClick={handleRemoveVideo}
                   >
