@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { useToast } from '@/hooks/use-toast';
-import { Github, Mail } from 'lucide-react';
+import { Button } from '@/app/components/ui/button';
+import { Input } from '@/app/components/ui/input';
+import { Label } from '@/app/components/ui/label';
+import { Separator } from '@/app/components/ui/separator';
+import { useToast } from '@/app/hooks/use-toast';
+import { Github} from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -60,7 +60,7 @@ export default function LoginPage() {
 
       <div className="space-y-4">
         <Button 
-          variant="outline" 
+         // variant="outline" 
           className="w-full flex items-center justify-center gap-2 h-11"
           onClick={() => handleOAuthLogin('Google')}
           disabled={isLoading}
@@ -87,7 +87,7 @@ export default function LoginPage() {
         </Button>
         
         <Button 
-          variant="outline" 
+         // variant="outline" 
           className="w-full flex items-center justify-center gap-2 h-11"
           onClick={() => handleOAuthLogin('GitHub')}
           disabled={isLoading}
@@ -148,7 +148,7 @@ export default function LoginPage() {
       
       <div className="mt-6 text-center text-sm">
         <p className="text-muted-foreground">
-          Don't have an account?{" "}
+          Do not have an account?{" "}
           <Link href="/auth/signup" className="text-primary hover:underline">
             Sign up
           </Link>
