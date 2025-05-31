@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { useToast } from '@/hooks/use-toast';
-import { Github, Mail } from 'lucide-react';
+import { Button } from '@/app/components/ui/button';
+import { Input } from '@/app/components/ui/input';
+import { Label } from '@/app/components/ui/label';
+import { Separator } from '@/app/components/ui/separator';
+import { useToast } from '@/app/hooks/use-toast';
+import { Github } from 'lucide-react';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -60,7 +60,7 @@ export default function SignupPage() {
 
       <div className="space-y-4">
         <Button 
-          variant="outline" 
+          //variant="outline" 
           className="w-full flex items-center justify-center gap-2 h-11"
           onClick={() => handleOAuthSignup('Google')}
           disabled={isLoading}
@@ -87,7 +87,7 @@ export default function SignupPage() {
         </Button>
         
         <Button 
-          variant="outline" 
+          //variant="outline" 
           className="w-full flex items-center justify-center gap-2 h-11"
           onClick={() => handleOAuthSignup('GitHub')}
           disabled={isLoading}
