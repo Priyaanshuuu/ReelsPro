@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/app/components/ui/avatar';
+import { Button } from '@/app/components/ui/button';
 import { Heart, MoreHorizontal } from 'lucide-react';
 import { CommentType } from '@/lib/types';
 
@@ -58,7 +58,7 @@ export default function CommentItem({ comment }: CommentItemProps) {
         </div>
       </div>
       
-      <Button variant="ghost" size="icon" className="h-8 w-8">
+      <Button  className="h-8 w-8">
         <MoreHorizontal className="h-4 w-4" />
       </Button>
     </div>
