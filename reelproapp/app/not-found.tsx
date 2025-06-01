@@ -25,7 +25,7 @@ export default function NotFoundPage() {
         
         <h1 className="text-4xl font-bold mb-2">Page Not Found</h1>
         <p className="text-xl text-muted-foreground mb-8">
-          The reel you're looking for has gone missing.
+          The reel you are looking for has gone missing.
         </p>
         
         <div className="space-y-3">
