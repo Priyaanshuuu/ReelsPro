@@ -50,7 +50,7 @@ function PreviewCard({ username, caption, gradient, hideOnMobile = false }: Prev
           </button>
         ))}
       </div>
-      <div className="p-4 absolute bottom-0 w-full bg-gradient-to-t from-background/90 to-transparent">
+      <div className="p-4 absolute bottom-0 w-full bg-gradient-to-t from-black/90 to-transparent">
         <p className="font-medium text-foreground">{username}</p>
         <p className="text-sm text-muted-foreground">{caption}</p>
       </div>
@@ -60,17 +60,17 @@ function PreviewCard({ username, caption, gradient, hideOnMobile = false }: Prev
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-background/90">
+    <div className="min-h-screen bg-black">
       <HeroSection />
       <FeatureSection />
 
       {/* App Preview Section */}
       <section className="py-20 px-4 md:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground text-white">
             Experience the Future of Video Sharing
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto text-white">
             Seamlessly scroll through content that matters to you, engage with creators, and share your own story.
           </p>
         </div>
@@ -83,7 +83,7 @@ export default function Home() {
 
         <div className="mt-12 text-center">
           <Link href="/auth/signup">
-            <Button className="rounded-full px-8 py-6 text-lg font-medium bg-primary hover:bg-primary/90">
+            <Button className="rounded-full px-8 py-6 text-lg font-medium bg-primary hover:bg-primary/90 text-white">
               Join ReelsPro Now
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
@@ -92,13 +92,13 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border/60 bg-background py-8 px-4">
+      <footer className="border-t border-border/60 bg-black py-8 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text mb-4 md:mb-0">
               ReelsPro
             </div>
-            <nav className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+            <nav className="flex flex-wrap gap-4 text-sm text-muted-foreground text-white">
               {['About', 'Terms', 'Privacy', 'Help Center', 'Creators', 'Community'].map((item) => (
                 <Link key={item} href="#" className="hover:text-foreground transition">
                   {item}
@@ -106,7 +106,7 @@ export default function Home() {
               ))}
             </nav>
           </div>
-          <p className="mt-6 text-center text-sm text-muted-foreground">
+          <p className="mt-6 text-center text-sm text-muted-foreground text-white">
             &copy; {new Date().getFullYear()} ReelsPro. All rights reserved.
           </p>
         </div>
