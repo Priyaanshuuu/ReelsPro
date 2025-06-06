@@ -9,27 +9,55 @@ import { Label } from '@/app/components/ui/label';
 import { Separator } from '@/app/components/ui/separator';
 import { useToast } from '@/app/hooks/use-toast';
 import { Github } from 'lucide-react';
+import { log } from 'console';
 
 export default function SignupPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  
+
+  const [form , setForm] = useState({
+    name: '',
+    username: '',
+    email: '',
+    password: ''
+  });
+
   const handleSignupSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate signup
-    setTimeout(() => {
-      setIsLoading(false);
+   try {
+    const res = await fetch("api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(form)
+    });
+
+    const data = await res.json();
+    if(res.ok){
       toast({
-        title: "Account created",
-        description: "Welcome to ReelsPro!",
-      });
+        title:"Account Created!!",
+        description:"Welcome to Reels Pro"
+      })
       router.push('/feed');
-    }, 1000);
-  };
-  
+    }
+
+   
+  } catch (error) {
+    toast({
+      title: "Error",
+      description: "Failed to create account",
+    });
+    console.log(error);
+    
+  } finally {
+    setIsLoading(false);
+  }
+};
+
   const handleOAuthSignup = (provider: string) => {
     setIsLoading(true);
     
