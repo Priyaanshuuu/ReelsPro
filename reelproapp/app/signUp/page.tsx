@@ -36,15 +36,20 @@ export default function SignupPage() {
       body: JSON.stringify(form)
     });
 
-    await res.json();
+    const data = await res.json();
     if(res.ok){
       toast({
         title:"Account Created!!",
         description:"Welcome to Reels Pro"
       })
-      router.push('../components/feed/page.tsx');
+      router.push('/feed');
+    }else{
+      toast({
+        title: "Error",
+        description: data.error || "Failed to create account",
+      });
+      console.log(data.error);
     }
-
    
   } catch (error) {
     toast({
@@ -68,7 +73,7 @@ export default function SignupPage() {
         title: `${provider} signup successful`,
         description: "Welcome to ReelsPro!",
       });
-      router.push('/components/feed');
+      router.push('/feed');
     }, 1000);
   };
   
