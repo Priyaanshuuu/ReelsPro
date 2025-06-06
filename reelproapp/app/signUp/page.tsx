@@ -42,11 +42,13 @@ export default function SignupPage() {
         title:"Account Created!!",
         description:"Welcome to Reels Pro"
       })
+      console.log(data);
+      
       router.push('/feed');
     }else{
       toast({
         title: "Error",
-        description: data.error || "Failed to create account",
+        description: data?.error || "Failed to create account",
       });
       console.log(data.error);
     }
