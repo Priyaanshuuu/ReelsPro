@@ -9,7 +9,7 @@ import { Label } from '@/app/components/ui/label';
 import { Separator } from '@/app/components/ui/separator';
 import { useToast } from '@/app/hooks/use-toast';
 import { Github } from 'lucide-react';
-import { log } from 'console';
+//import { log } from 'console';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -132,6 +132,7 @@ export default function SignupPage() {
               placeholder="Enter your name"
               required
               disabled={isLoading}
+              onChange={(e) => setForm({...form, name: e.target.value})}
               className="bg-gray-900 text-white border-gray-700 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
@@ -142,6 +143,7 @@ export default function SignupPage() {
               placeholder="Choose a username"
               required
               disabled={isLoading}
+              onChange={(e) => setForm({...form, username: e.target.value})}
               className="bg-gray-900 text-white border-gray-700 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
