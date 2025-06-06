@@ -4,7 +4,7 @@ import User from "@/models/User.model"
 
 export async function POST(request: NextRequest){
     try {
-        const {email,password} = await request.json();
+        const {name,username,email,password} = await request.json();
 
         if(!email || !password){
             return NextResponse.json(
@@ -15,7 +15,9 @@ export async function POST(request: NextRequest){
 
         await dbConnect();
         
-        const existingUser = await User.findOne({email});
+        const existingUser = await User.findOne({
+            $or: [{ email }, { username }]
+        });
         if(existingUser){
             return NextResponse.json(
                 {error: "User already exists"},
@@ -24,6 +26,8 @@ export async function POST(request: NextRequest){
         }
 
         await User.create({
+            name,
+            username,
             email,
             password,
         })

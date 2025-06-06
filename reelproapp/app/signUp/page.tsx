@@ -42,7 +42,7 @@ export default function SignupPage() {
         title:"Account Created!!",
         description:"Welcome to Reels Pro"
       })
-      router.push('/feed');
+      router.push('../components/feed/page.tsx');
     }
 
    
@@ -68,7 +68,7 @@ export default function SignupPage() {
         title: `${provider} signup successful`,
         description: "Welcome to ReelsPro!",
       });
-      router.push('/feed');
+      router.push('/components/feed');
     }, 1000);
   };
   
