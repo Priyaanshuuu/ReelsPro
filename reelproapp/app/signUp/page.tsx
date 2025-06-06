@@ -36,7 +36,7 @@ export default function SignupPage() {
       body: JSON.stringify(form)
     });
 
-    const data = await res.json();
+    await res.json();
     if(res.ok){
       toast({
         title:"Account Created!!",
@@ -155,6 +155,7 @@ export default function SignupPage() {
               placeholder="name@example.com"
               required
               disabled={isLoading}
+              onChange={(e) => setForm({...form, email: e.target.value})}
               className="bg-gray-900 text-white border-gray-700 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
@@ -166,6 +167,7 @@ export default function SignupPage() {
               placeholder="Create a password"
               required
               disabled={isLoading}
+              onChange={(e) => setForm({...form, password: e.target.value})}
               className="bg-gray-900 text-white border-gray-700 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
