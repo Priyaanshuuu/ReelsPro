@@ -2,22 +2,20 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+//import { useRouter } from 'next/navigation';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
 import { Label } from '@/app/components/ui/label';
 import { Separator } from '@/app/components/ui/separator';
 import { useToast } from '@/app/hooks/use-toast';
 import { Github } from 'lucide-react';  
-import {signIn} from 'next-auth/react';
-
+import { signIn } from 'next-auth/react';
 
 export default function SignupPage() {
-  const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
-  const [form , setForm] = useState({
+  const [form, setForm] = useState({
     name: '',
     username: '',
     email: '',
@@ -27,70 +25,57 @@ export default function SignupPage() {
   const handleSignupSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    
-   try {
-    const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(form)
-    });
 
-    const data = await res.json();
-
-    if (res.ok) {
-      const loginRes = await signIn("credentials", {
-        email: form.email,
-        password: form.password,
-        redirect: true,
-        callbackUrl: "/feed", 
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(form)
       });
 
-      console.log("Auto sign-in response:", loginRes);
-    } else {
+      const data = await res.json();
+
+      if (res.ok) {
+        const loginRes = await signIn("credentials", {
+          email: form.email,
+          password: form.password,
+          redirect: true,
+          callbackUrl: "/feed", 
+        });
+
+        console.log("Auto sign-in response:", loginRes);
+      } else {
+        toast({
+          title: "Error",
+          description: data?.error || "Failed to create account",
+        });
+      }
+
+    } catch (error) {
       toast({
         title: "Error",
-        description: data?.error || "Failed to create account",
+        description: "Failed to create account",
       });
+      console.log(error);
+
+    } finally {
+      setIsLoading(false);
     }
-   
-  } catch (error) {
-    toast({
-      title: "Error",
-      description: "Failed to create account",
+  };
+
+  const handleOAuthSignup = async (provider: string) => {
+    setIsLoading(true);
+
+    // For OAuth, let NextAuth handle the redirect
+    await signIn(provider, { 
+      callbackUrl: '/feed'
     });
-    console.log(error);
-    
-  } finally {
+
     setIsLoading(false);
-  }
-};
+  };
 
-const handleOAuthSignup = async (provider: string) => {
-  setIsLoading(true);
-
-  const result = await signIn(provider, { 
-    redirect: false,
-    callbackUrl: '/feed'
-  });
-
-  setIsLoading(false);
-
-  if (result?.error) {
-    toast({
-      title: "Error",
-      description: result.error || `Failed to sign in with ${provider}`,
-    });
-  } else {
-    toast({
-      title: `${provider.charAt(0).toUpperCase() + provider.slice(1)} signup successful`,
-      description: "Welcome to ReelsPro!",
-    });
-    router.push('/feed');
-  }
-};
-  
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center px-4 py-10">
       <div className="w-full max-w-md">
@@ -109,7 +94,7 @@ const handleOAuthSignup = async (provider: string) => {
         <div className="space-y-4 mb-6">
           <Button 
             className="w-full flex items-center justify-center gap-2 h-11 bg-gray-800 hover:bg-gray-700 text-white hover:cursor-pointer"
-            onClick={() => handleOAuthSignup('Google')}
+            onClick={() => handleOAuthSignup('google')}
             disabled={isLoading}
           >
             {/* Google SVG */}
@@ -124,7 +109,7 @@ const handleOAuthSignup = async (provider: string) => {
           
           <Button 
             className="w-full flex items-center justify-center gap-2 h-11 bg-gray-800 hover:bg-gray-700 text-white hover:cursor-pointer"
-            onClick={() => handleOAuthSignup('GitHub')}
+            onClick={() => handleOAuthSignup('github')}
             disabled={isLoading}
           >
             <Github className="h-5 w-5" />
