@@ -8,7 +8,8 @@ import { Input } from '@/app/components/ui/input';
 import { Label } from '@/app/components/ui/label';
 import { Separator } from '@/app/components/ui/separator';
 import { useToast } from '@/app/hooks/use-toast';
-import { Github } from 'lucide-react';
+import { Github } from 'lucide-react';  
+import {signIn} from 'next-auth/react';
 //import { log } from 'console';
 
 export default function SignupPage() {
@@ -38,29 +39,35 @@ export default function SignupPage() {
 
     const data = await res.json();
     if(res.ok){
-      toast({
-        title:"Account Created!!",
-        description:"Welcome to Reels Pro"
-      })
-      console.log(data);
-      
-      router.push('/component/feed');
-    }else{
+       const loginRes = await signIn("credentials", {
+    redirect: false,
+    email: form.email,
+    password: form.password,
+  });
+
+  if (loginRes?.ok) {
+    toast({
+      title: "Account Created!!",
+      description: "Welcome to Reels Pro"
+    });
+    console.log(data);
+    router.push('/component/feed');
+  } else {
       toast({
         title: "Error",
         description: data?.error || "Failed to create account",
       });
       console.log(data.error);
     }
-   
-  } catch (error) {
+  }
+} catch (error) {
     toast({
       title: "Error",
       description: "Failed to create account",
     });
     console.log(error);
-    
-  } finally {
+  }
+  finally {
     setIsLoading(false);
   }
 };
