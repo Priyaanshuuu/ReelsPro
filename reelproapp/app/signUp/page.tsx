@@ -67,19 +67,29 @@ export default function SignupPage() {
   }
 };
 
-  const handleOAuthSignup = (provider: string) => {
-    setIsLoading(true);
-    
-    // Simulate OAuth signup
-    setTimeout(() => {
-      setIsLoading(false);
-      toast({
-        title: `${provider} signup successful`,
-        description: "Welcome to ReelsPro!",
-      });
-      router.push('/feed');
-    }, 1000);
-  };
+const handleOAuthSignup = async (provider: string) => {
+  setIsLoading(true);
+
+  const result = await signIn(provider, { 
+    redirect: false,  // we'll handle redirect manually
+    callbackUrl: '/feed'  // redirect after successful login
+  });
+
+  setIsLoading(false);
+
+  if (result?.error) {
+    toast({
+      title: "Error",
+      description: result.error || `Failed to sign in with ${provider}`,
+    });
+  } else {
+    toast({
+      title: `${provider.charAt(0).toUpperCase() + provider.slice(1)} signup successful`,
+      description: "Welcome to ReelsPro!",
+    });
+    router.push('/feed');  // redirect on success
+  }
+};
   
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center px-4 py-10">
