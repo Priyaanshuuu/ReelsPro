@@ -44,7 +44,7 @@ export default function SignupPage() {
         email: form.email,
         password: form.password,
         redirect: true,
-        callbackUrl: "/feed", // ✅ destination after login
+        callbackUrl: "/feed", 
       });
 
       console.log("Auto sign-in response:", loginRes);
@@ -71,8 +71,8 @@ const handleOAuthSignup = async (provider: string) => {
   setIsLoading(true);
 
   const result = await signIn(provider, { 
-    redirect: false,  // we'll handle redirect manually
-    callbackUrl: '/feed'  // redirect after successful login
+    redirect: false,
+    callbackUrl: '/feed'
   });
 
   setIsLoading(false);
@@ -87,7 +87,7 @@ const handleOAuthSignup = async (provider: string) => {
       title: `${provider.charAt(0).toUpperCase() + provider.slice(1)} signup successful`,
       description: "Welcome to ReelsPro!",
     });
-    router.push('/feed');  // redirect on success
+    router.push('/feed');
   }
 };
   
