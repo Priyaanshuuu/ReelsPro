@@ -43,7 +43,7 @@ export default function HeroSection() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-          <Link href="/auth/signup">
+          <Link href="/signup">
             <Button className="rounded-full px-8 py-6 text-lg font-medium bg-blue-600 hover:bg-blue-500 w-full sm:w-auto hover:cursor-pointer">
               Get Started
               <ArrowRight className="ml-2 h-5 w-5" />
