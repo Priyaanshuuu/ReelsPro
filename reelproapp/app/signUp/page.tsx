@@ -28,7 +28,7 @@ export default function SignupPage() {
     setIsLoading(true);
     
    try {
-    const res = await fetch("api/auth/register", {
+    const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -44,7 +44,7 @@ export default function SignupPage() {
       })
       console.log(data);
       
-      router.push('/feed');
+      router.push('/component/feed');
     }else{
       toast({
         title: "Error",
