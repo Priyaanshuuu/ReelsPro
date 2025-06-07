@@ -82,7 +82,7 @@ export default function Home() {
         </div>
 
         <div className="mt-12 text-center">
-          <Link href="/auth/signup">
+          <Link href="/signup">
             <Button className="rounded-full px-8 py-6 text-lg font-medium bg-primary hover:bg-primary/90 text-white">
               Join ReelsPro Now
               <ArrowRight className="ml-2 h-5 w-5" />

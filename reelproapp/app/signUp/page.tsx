@@ -44,7 +44,7 @@ export default function SignupPage() {
         email: form.email,
         password: form.password,
         redirect: true,
-        callbackUrl: "/component/feed", // ✅ destination after login
+        callbackUrl: "/feed", // ✅ destination after login
       });
 
       console.log("Auto sign-in response:", loginRes);
