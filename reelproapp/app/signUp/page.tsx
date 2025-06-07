@@ -9,8 +9,8 @@ import { Label } from '@/app/components/ui/label';
 import { Separator } from '@/app/components/ui/separator';
 import { useToast } from '@/app/hooks/use-toast';
 import { Github } from 'lucide-react';  
-//import {signIn} from 'next-auth/react';
-//import { log } from 'console';
+import {signIn} from 'next-auth/react';
+
 
 export default function SignupPage() {
   const router = useRouter();
@@ -38,20 +38,21 @@ export default function SignupPage() {
     });
 
     const data = await res.json();
-    if(res.ok){
-      toast({
-        title:"Account Created!!",
-        description:"Welcome to Reels Pro"
-      })
-      console.log(data);
-      
-      router.push('/component/feed');
-    }else{
+
+    if (res.ok) {
+      const loginRes = await signIn("credentials", {
+        email: form.email,
+        password: form.password,
+        redirect: true,
+        callbackUrl: "/component/feed", // ✅ destination after login
+      });
+
+      console.log("Auto sign-in response:", loginRes);
+    } else {
       toast({
         title: "Error",
         description: data?.error || "Failed to create account",
       });
-      console.log(data.error);
     }
    
   } catch (error) {
