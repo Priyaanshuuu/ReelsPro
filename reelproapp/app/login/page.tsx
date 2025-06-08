@@ -49,7 +49,7 @@ export default function LoginPage() {
   <div className="min-h-screen flex items-center justify-center bg-[#0f0f0f] px-4">
     <div className="w-full max-w-md bg-[#1a1a1a] p-6 rounded-2xl shadow-lg">
       <div className="text-center mb-6">
-        <h1 className="text-3xl font-bold tracking-tight text-white">Welcome Back 👋</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-white">Welcome Back </h1>
         <p className="text-sm text-gray-400 mt-1">Login to your ReelsPro account</p>
       </div>
 
