@@ -6,7 +6,6 @@ import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
 import { Textarea } from '@/app/components/ui/textarea';
 import { Label } from '@/app/components/ui/label';
-//import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/app/hooks/use-toast';
 import { Upload, Film, Image, X, Loader2 } from 'lucide-react';
 import Navigation from '@/app/components/navigation';
@@ -22,34 +21,30 @@ export default function UploadPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  // Handle drag events
+
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(true);
   };
-  
+
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
   };
-  
+
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!isDragging) {
-      setIsDragging(true);
-    }
+    if (!isDragging) setIsDragging(true);
   };
-  
-  // Handle drop
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const file = e.dataTransfer.files[0];
       if (file.type.startsWith('video/')) {
@@ -63,45 +58,33 @@ export default function UploadPage() {
       }
     }
   };
-  
-  // Handle file selection
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      handleVideoFile(file);
+      handleVideoFile(e.target.files[0]);
     }
   };
-  
-  // Process video file
+
   const handleVideoFile = (file: File) => {
     setVideoFile(file);
-    
-    // Create a preview URL
-    const preview = URL.createObjectURL(file);
-    setVideoPreview(preview);
-    
+    setVideoPreview(URL.createObjectURL(file));
+
     toast({
       title: "Video selected",
       description: `${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`,
     });
   };
-  
-  // Remove selected video
+
   const handleRemoveVideo = () => {
-    if (videoPreview) {
-      URL.revokeObjectURL(videoPreview);
-    }
+    if (videoPreview) URL.revokeObjectURL(videoPreview);
     setVideoFile(null);
     setVideoPreview(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
-  
-  // Handle form submission
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!videoFile) {
       toast({
         variant: "destructive",
@@ -110,16 +93,14 @@ export default function UploadPage() {
       });
       return;
     }
-    
-    // Simulate upload
+
     setIsUploading(true);
-    
+
     const interval = setInterval(() => {
       setUploadProgress((prev) => {
         const newProgress = prev + 10;
         if (newProgress >= 100) {
           clearInterval(interval);
-          
           setTimeout(() => {
             setIsUploading(false);
             toast({
@@ -128,35 +109,34 @@ export default function UploadPage() {
             });
             router.push('/feed');
           }, 500);
-          
           return 100;
         }
         return newProgress;
       });
     }, 300);
   };
-  
+
   return (
-    <>
-      <Navigation />
-      
-      <div className="container max-w-4xl pt-8 pb-16">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold">Upload Video</h1>
-          <p className="text-muted-foreground">Share your video with the ReelsPro community</p>
+  <>
+    <Navigation />
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] text-white px-4 py-10">
+      <div className="container max-w-4xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-extrabold">Upload Video</h1>
+          <p className="text-gray-400 mt-1">Share your video with the ReelsPro community</p>
         </div>
-        
+
         <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Video upload area */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            {/* Upload Area */}
             <div>
               {!videoPreview ? (
-                <div 
-                  className={`relative border-2 border-dashed rounded-lg h-96 flex flex-col items-center justify-center p-6 transition-all ${
-                    isDragging 
-                      ? "border-primary/70 bg-primary/5" 
-                      : "border-border/60 bg-muted/20 hover:bg-muted/30"
-                  }`}
+                <div
+                  className={`relative h-96 border-2 border-dashed rounded-xl bg-black/30 backdrop-blur-md p-6 flex flex-col items-center justify-center transition-all
+                    ${isDragging 
+                      ? "border-indigo-400 bg-indigo-900/20" 
+                      : "border-gray-500 hover:bg-black/40"
+                    } transform transition-transform hover:scale-105 duration-300`}
                   onDragEnter={handleDragEnter}
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
@@ -169,17 +149,14 @@ export default function UploadPage() {
                     className="hidden"
                     onChange={handleFileChange}
                   />
-                  
                   <div className="flex flex-col items-center text-center">
-                    <Film className="h-12 w-12 text-muted-foreground mb-4" />
+                    <Film className="h-12 w-12 text-gray-400 mb-4" />
                     <h3 className="text-lg font-medium mb-2">Drag and drop your video</h3>
-                    <p className="text-sm text-muted-foreground mb-6">
-                      MP4, WebM, or OGG. Maximum file size 100MB.
-                    </p>
+                    <p className="text-sm text-gray-400 mb-6">MP4, WebM, or OGG. Max 100MB.</p>
                     <Button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="rounded-full"
+                      className="rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg hover:opacity-90 transition-all px-6 py-2 flex items-center"
                     >
                       <Upload className="mr-2 h-4 w-4" />
                       Select File
@@ -187,17 +164,11 @@ export default function UploadPage() {
                   </div>
                 </div>
               ) : (
-                <div className="relative h-96 rounded-lg overflow-hidden bg-black">
-                  <video
-                    src={videoPreview}
-                    className="h-full w-full object-contain"
-                    controls
-                  />
+                <div className="relative h-96 rounded-lg overflow-hidden bg-black shadow-lg">
+                  <video src={videoPreview} className="h-full w-full object-contain" controls />
                   <Button
                     type="button"
-                    //variant="destructive"
-                    //size="icon"
-                    className="absolute top-2 right-2 rounded-full"
+                    className="absolute top-2 right-2 rounded-full bg-red-600 text-white hover:bg-red-700 shadow-md transition"
                     onClick={handleRemoveVideo}
                   >
                     <X className="h-4 w-4" />
@@ -205,48 +176,47 @@ export default function UploadPage() {
                 </div>
               )}
             </div>
-            
-            {/* Video details */}
-            <div className="space-y-6">
+
+            {/* Details */}
+            <div className="space-y-8">
               <div className="space-y-2">
-                <Label htmlFor="caption">Caption</Label>
+                <Label htmlFor="caption" className="text-white font-semibold">Caption</Label>
                 <Textarea
                   id="caption"
-                  placeholder="Write a caption for your video..."
-                  className="resize-none min-h-[100px]"
+                  placeholder="Write a caption..."
+                  className="resize-none min-h-[100px] bg-black/20 border border-gray-600 rounded-md text-white placeholder-gray-400 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   value={caption}
                   onChange={(e) => setCaption(e.target.value)}
                   maxLength={150}
                   disabled={isUploading}
                 />
-                <p className="text-xs text-muted-foreground text-right">
-                  {caption.length}/150
-                </p>
+                <p className="text-xs text-gray-400 text-right">{caption.length}/150</p>
               </div>
-              
+
               <div className="space-y-2">
-                <Label htmlFor="tags">Tags</Label>
+                <Label htmlFor="tags" className="text-white font-semibold">Tags</Label>
                 <Input
                   id="tags"
-                  placeholder="Add tags separated by commas (e.g., travel, nature)"
+                  placeholder="Add tags separated by commas"
                   value={tags}
                   onChange={(e) => setTags(e.target.value)}
                   disabled={isUploading}
+                  className="bg-black/20 border border-gray-600 rounded-md text-white placeholder-gray-400 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
-              
+
               <div className="space-y-2">
-                <Label>Thumbnail</Label>
-                <div className="border border-border rounded-lg p-4 bg-card/50">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Image className="h-5 w-5 text-muted-foreground" />
-                    <span className="text-sm">Choose a thumbnail for your video</span>
+                <Label className="text-white font-semibold">Thumbnail</Label>
+                <div className="border border-gray-600 rounded-lg p-4 bg-black/30 backdrop-blur-md">
+                  <div className="flex items-center gap-3 mb-4 text-gray-400">
+                    <Image className="h-5 w-5" />
+                    <span className="text-sm">Choose a thumbnail</span>
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-3">
                     {[1, 2, 3].map((i) => (
-                      <div 
-                        key={i} 
-                        className="aspect-[9/16] rounded bg-muted flex items-center justify-center cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all"
+                      <div
+                        key={i}
+                        className="aspect-[9/16] rounded-lg bg-white/10 hover:bg-white/20 hover:ring-2 hover:ring-indigo-400 backdrop-blur-md flex items-center justify-center text-lg font-semibold transition-all text-white cursor-pointer shadow-lg"
                       >
                         {i}
                       </div>
@@ -254,31 +224,31 @@ export default function UploadPage() {
                   </div>
                 </div>
               </div>
-              
+
               {isUploading && (
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
+                <div className="space-y-3">
+                  <div className="flex justify-between text-sm text-gray-400">
                     <span>Uploading...</span>
                     <span>{uploadProgress}%</span>
                   </div>
-                  <div className="h-2 w-full bg-muted/50 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-primary transition-all duration-300"
+                  <div className="h-2 w-full bg-gray-700 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-indigo-500 transition-all duration-300"
                       style={{ width: `${uploadProgress}%` }}
                     ></div>
                   </div>
                 </div>
               )}
-              
+
               <div className="pt-4">
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg hover:opacity-90 transition-all px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center"
                   disabled={!videoFile || isUploading}
                 >
                   {isUploading ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                       Uploading...
                     </>
                   ) : (
@@ -290,6 +260,8 @@ export default function UploadPage() {
           </div>
         </form>
       </div>
-    </>
-  );
+    </div>
+  </>
+);
+
 }
