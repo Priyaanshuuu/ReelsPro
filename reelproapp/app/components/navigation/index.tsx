@@ -12,7 +12,6 @@ export default function Navigation() {
 
   const isLandingPage = pathname === "/";
 
-  // Scroll effect logic
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
@@ -21,12 +20,18 @@ export default function Navigation() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Don't show navbar on auth pages
   if (pathname.startsWith("/auth")) return null;
+
+  const navItems = [
+    { name: "Home", href: "/feed", icon: <Home className="w-6 h-6" /> },
+    { name: "Discover", href: "/discover", icon: <Compass className="w-6 h-6" /> },
+    { name: "Upload", href: "/upload", icon: <PlusSquare className="w-6 h-6" /> },
+    { name: "Activity", href: "/activity", icon: <Heart className="w-6 h-6" /> },
+    { name: "Profile", href: "/profile", icon: <UserCircle className="w-6 h-6" /> },
+  ];
 
   return (
     <>
-      {/* Navbar */}
       <header
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
@@ -43,26 +48,18 @@ export default function Navigation() {
           </Link>
 
           <nav className="flex space-x-6 text-white">
-            <Link href="/feed">
-              <Home className="w-6 h-6" />
-            </Link>
-            <Link href="/discover">
-              <Compass className="w-6 h-6" />
-            </Link>
-            <Link href="/upload">
-              <PlusSquare className="w-6 h-6" />
-            </Link>
-            <Link href="/activity">
-              <Heart className="w-6 h-6" />
-            </Link>
-            <Link href="/profile">
-              <UserCircle className="w-6 h-6" />
-            </Link>
+            {navItems.map((item) => (
+              <div key={item.name} className="relative group">
+                <Link href={item.href}>{item.icon}</Link>
+                <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-sm text-gray-300 bg-[#1f2937] px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200">
+                  {item.name}
+                </span>
+              </div>
+            ))}
           </nav>
         </div>
       </header>
 
-      {/* Padding for content below navbar */}
       <div className="h-16" />
     </>
   );
