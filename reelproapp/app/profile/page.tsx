@@ -10,7 +10,7 @@ interface ReelGridProps {
   reels: ReelType[];
 }
 
-export default function ReelGrid({ reels }: ReelGridProps) {
+export default function ReelGrid({ reels=[] }: ReelGridProps) {
   const router = useRouter();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   
