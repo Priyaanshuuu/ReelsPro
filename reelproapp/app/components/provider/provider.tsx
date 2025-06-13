@@ -1,7 +1,7 @@
 "use client"
 import { SessionProvider } from "next-auth/react"
 import { ImageKitProvider } from "@imagekit/next"
-import {NotificationProvider} from "../Notification"
+import {NotificationProvider} from "../notification/page"
 
 const urlEndpoint = process.env.IMAGEKIT_PUBLIC_KEY;
 const publicKey = process.env.IMAGEKIT_URL_ENDPOINT;
