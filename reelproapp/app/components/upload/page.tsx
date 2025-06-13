@@ -1,122 +1,123 @@
 "use client";
+import {
+    ImageKitAbortError,
+    ImageKitInvalidRequestError,
+    ImageKitServerError,
+    ImageKitUploadNetworkError,
+    upload,
+} from "@imagekit/next";
+import { useRef, useState } from "react";
 
-import { useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/app/components/ui/button';
-import { Input } from '@/app/components/ui/input';
-import { Textarea } from '@/app/components/ui/textarea';
-import { Label } from '@/app/components/ui/label';
-import { useToast } from '@/app/hooks/use-toast';
-import { Upload, Film, Image, X, Loader2 } from 'lucide-react';
-import Navigation from '@/app/components/navigation';
+// UploadExample component demonstrates file uploading using ImageKit's Next.js SDK.
+const UploadExample = () => {
+    // State to keep track of the current upload progress (percentage)
+    const [progress, setProgress] = useState(0);
 
-export default function UploadPage() {
-  const router = useRouter();
-  const { toast } = useToast();
-  const [isDragging, setIsDragging] = useState(false);
-  const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [videoPreview, setVideoPreview] = useState<string | null>(null);
-  const [caption, setCaption] = useState('');
-  const [tags, setTags] = useState('');
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+    // Create a ref for the file input element to access its files easily
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleDragEnter = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  };
+    // Create an AbortController instance to provide an option to cancel the upload if needed.
+    const abortController = new AbortController();
 
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  };
+    /**
+     * Authenticates and retrieves the necessary upload credentials from the server.
+     *
+     * This function calls the authentication API endpoint to receive upload parameters like signature,
+     * expire time, token, and publicKey.
+     *
+     * @returns {Promise<{signature: string, expire: string, token: string, publicKey: string}>} The authentication parameters.
+     * @throws {Error} Throws an error if the authentication request fails.
+     */
+    const authenticator = async () => {
+        try {
+            // Perform the request to the upload authentication endpoint.
+            const response = await fetch("/api/upload-auth");
+            if (!response.ok) {
+                // If the server response is not successful, extract the error text for debugging.
+                const errorText = await response.text();
+                throw new Error(`Request failed with status ${response.status}: ${errorText}`);
+            }
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!isDragging) setIsDragging(true);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const file = e.dataTransfer.files[0];
-      if (file.type.startsWith('video/')) {
-        handleVideoFile(file);
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Invalid file type",
-          description: "Please upload a video file.",
-        });
-      }
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      handleVideoFile(e.target.files[0]);
-    }
-  };
-
-  const handleVideoFile = (file: File) => {
-    setVideoFile(file);
-    setVideoPreview(URL.createObjectURL(file));
-
-    toast({
-      title: "Video selected",
-      description: `${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`,
-    });
-  };
-
-  const handleRemoveVideo = () => {
-    if (videoPreview) URL.revokeObjectURL(videoPreview);
-    setVideoFile(null);
-    setVideoPreview(null);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!videoFile) {
-      toast({
-        variant: "destructive",
-        title: "No video selected",
-        description: "Please upload a video to continue.",
-      });
-      return;
-    }
-
-    setIsUploading(true);
-
-    const interval = setInterval(() => {
-      setUploadProgress((prev) => {
-        const newProgress = prev + 10;
-        if (newProgress >= 100) {
-          clearInterval(interval);
-          setTimeout(() => {
-            setIsUploading(false);
-            toast({
-              title: "Upload complete",
-              description: "Your video has been published!",
-            });
-            router.push('/feed');
-          }, 500);
-          return 100;
+            // Parse and destructure the response JSON for upload credentials.
+            const data = await response.json();
+            const { signature, expire, token, publicKey } = data;
+            return { signature, expire, token, publicKey };
+        } catch (error) {
+            // Log the original error for debugging before rethrowing a new error.
+            console.error("Authentication error:", error);
+            throw new Error("Authentication request failed");
         }
-        return newProgress;
-      });
-    }, 300);
-  };
+    };
 
-  return (
+    /**
+     * Handles the file upload process.
+     *
+     * This function:
+     * - Validates file selection.
+     * - Retrieves upload authentication credentials.
+     * - Initiates the file upload via the ImageKit SDK.
+     * - Updates the upload progress.
+     * - Catches and processes errors accordingly.
+     */
+    const handleUpload = async () => {
+        // Access the file input element using the ref
+        const fileInput = fileInputRef.current;
+        if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+            alert("Please select a file to upload");
+            return;
+        }
+
+        // Extract the first file from the file input
+        const file = fileInput.files[0];
+
+        // Retrieve authentication parameters for the upload.
+        let authParams;
+        try {
+            authParams = await authenticator();
+        } catch (authError) {
+            console.error("Failed to authenticate for upload:", authError);
+            return;
+        }
+        const { signature, expire, token, publicKey } = authParams;
+
+        // Call the ImageKit SDK upload function with the required parameters and callbacks.
+        try {
+            const uploadResponse = await upload({
+                // Authentication parameters
+                expire,
+                token,
+                signature,
+                publicKey,
+                file,
+                fileName: file.name, // Optionally set a custom file name
+                // Progress callback to update upload progress state
+                onProgress: (event) => {
+                    setProgress((event.loaded / event.total) * 100);
+                },
+                // Abort signal to allow cancellation of the upload if needed.
+                abortSignal: abortController.signal,
+            });
+            console.log("Upload response:", uploadResponse);
+        } catch (error) {
+            // Handle specific error types provided by the ImageKit SDK.
+            if (error instanceof ImageKitAbortError) {
+                console.error("Upload aborted:", error.reason);
+            } else if (error instanceof ImageKitInvalidRequestError) {
+                console.error("Invalid request:", error.message);
+            } else if (error instanceof ImageKitUploadNetworkError) {
+                console.error("Network error:", error.message);
+            } else if (error instanceof ImageKitServerError) {
+                console.error("Server error:", error.message);
+            } else {
+                // Handle any other errors that may occur.
+                console.error("Upload error:", error);
+            }
+        }
+    };
+
+
+
+  /*return (
   <>
     <Navigation />
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] text-white px-4 py-10">
@@ -128,7 +129,7 @@ export default function UploadPage() {
 
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            {/* Upload Area */}
+            {/* Upload Area }
             <div>
               {!videoPreview ? (
                 <div
@@ -177,7 +178,7 @@ export default function UploadPage() {
               )}
             </div>
 
-            {/* Details */}
+            {/* Details }
             <div className="space-y-8">
               <div className="space-y-2">
                 <Label htmlFor="caption" className="text-white font-semibold">Caption</Label>
@@ -262,6 +263,6 @@ export default function UploadPage() {
       </div>
     </div>
   </>
-);
+);*/
+  }
 
-}
