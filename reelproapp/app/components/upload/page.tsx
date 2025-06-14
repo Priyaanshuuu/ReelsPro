@@ -66,7 +66,7 @@ export default function FileUpload({
 
 
 
-  /*return (
+  return (
   <>
     <Navigation />
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] text-white px-4 py-10">
@@ -78,7 +78,7 @@ export default function FileUpload({
 
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            {/* Upload Area }
+            
             <div>
               {!videoPreview ? (
                 <div
@@ -127,7 +127,7 @@ export default function FileUpload({
               )}
             </div>
 
-            {/* Details }
+            
             <div className="space-y-8">
               <div className="space-y-2">
                 <Label htmlFor="caption" className="text-white font-semibold">Caption</Label>
@@ -212,6 +212,6 @@ export default function FileUpload({
       </div>
     </div>
   </>
-);*/
+);
   
 
