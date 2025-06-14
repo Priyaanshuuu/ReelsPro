@@ -34,9 +34,30 @@ export default function FileUpload({
     setError(null);
   }
 
-  const handleProgress = (=>{
-    
-  })
+  const handleProgress = (evt:ProgressEvent)=>{
+    if(evt.lengthComputable && onProgress){
+      const percentComplete = (evt.loaded/evt.total)*100;
+      onProgress(Math.round(percentComplete));
+    }
+  }
+  const validateFile = (file:File)=>{
+    if(fileType==="video"){
+      if(!file.type.startsWith("video/")){
+        setError("Please upload a valid video file");
+        return false;
+      }
+      if(file.size>100*1024*1024){
+        setError("Video size must be less than 100MB");
+      }
+    }else{
+      const validTypes = ["image/jpeg","image/png","image/webp"];
+      if(!validTypes.includes(file.type)){
+        setError("Please upload a valid image file(JPEG,PNG or WebP");
+        return false;
+      }
+    }
+    return true;
+
   }
 
   
