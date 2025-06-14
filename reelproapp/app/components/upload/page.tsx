@@ -1,7 +1,7 @@
 "use client";
 import {IKUpload} from "imagekitio-next";
 import {IKUploadResponse} from "imagekitio-next/dist/types/components/IKUpload/props";
-import {useState, useRef} from "react";
+import {useState} from "react";
 
 
 
