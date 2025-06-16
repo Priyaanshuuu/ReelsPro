@@ -3,6 +3,8 @@ import {IKUpload} from "imagekitio-next";
 import {IKUploadResponse} from "imagekitio-next/dist/types/components/IKUpload/props";
 import {useState} from "react";
 import Navigation from "../navigation";
+import { Button } from "../ui/button";
+import { Loader } from "lucide-react";
 
 
 
@@ -198,7 +200,7 @@ export default function FileUpload({
                   >
                     {uploading ? (
                       <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        <Loader className="mr-2 h-5 w-5 animate-spin" />
                         Uploading...
                       </>
                     ) : (
