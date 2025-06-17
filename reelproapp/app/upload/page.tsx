@@ -2,8 +2,8 @@
 import {IKUpload} from "imagekitio-next";
 import {IKUploadResponse} from "imagekitio-next/dist/types/components/IKUpload/props";
 import {useState} from "react";
-import Navigation from "../navigation";
-import { Button } from "../ui/button";
+import Navigation from "../components/navigation";
+import { Button } from "../components/ui/button";
 import { Loader } from "lucide-react";
 
 
