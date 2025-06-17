@@ -30,4 +30,3 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         }, 3000);
         }
     }
-}
