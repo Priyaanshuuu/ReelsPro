@@ -7,7 +7,7 @@ import Video, {IVideo} from "@/models/Video.model";
 export async function GET(){
     try {
         await dbConnect();
-        const videos = (await Video.find({})).sort({createdAt:-1});//lean
+        const videos = await Video.find({}).sort({ createdAt: -1 }); //lean
 
         if(!videos || videos.length===0){
             return NextResponse.json([], {status: 200});
@@ -48,12 +48,11 @@ export async function POST(request: NextRequest){
         const videoData = {
             ...body,
             controls: body.controls?? true,
-            transformation:{
-                height: 1920,
-        width: 1080,
-        quality: body.transformation?.quality ?? 100,
-
-            }
+        transformations:{
+            height: 1920,
+            width: 1080,
+            quality: body.transformations?.quality ?? 100,
+        }
         }
         const newVideo = await Video.create({videoData});
         return NextResponse.json(newVideo)
