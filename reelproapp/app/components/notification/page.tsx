@@ -66,5 +66,5 @@ export function useNotification(){
     }
     return context;
 }
-
+// This page handles the activities of the user that is it will show that is the reel posted and other stuffs
 
