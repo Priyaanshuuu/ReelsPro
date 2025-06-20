@@ -29,4 +29,20 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
             setNotification((current)=>(current?.id === id? null: current));
         }, 3000);
         }
-    }
+    return(
+        <NotificationContext.Provider value={{ showNotification }}>
+            {children}
+            {notification && (
+                <div className="toast toast-bottom toast-end z-[100]">
+                    <div className={`alert ${getAlertClass(NotificationContext.type)}`}>
+                        <span>{Notification.message}</span>
+
+                    </div>
+
+                </div>
+            )}
+        </NotificationContext.Provider>
+    )
+    };
+
+
