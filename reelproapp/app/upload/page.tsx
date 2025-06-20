@@ -1,71 +1,46 @@
-"use client";
-import {IKUpload} from "imagekitio-next";
-import {IKUploadResponse} from "imagekitio-next/dist/types/components/IKUpload/props";
-import {useState} from "react";
+// pages/Upload.tsx
+
+import { useState } from "react";
+import { IKUploadResponse } from "imagekitio-next/dist/types/components/IKUpload/props";
+import FileUpload from "../components/FileUpload";
 import Navigation from "../components/navigation";
+import { Film, Image, X, Loader } from "lucide-react";
+import { Label } from "../components/ui/label";
 import { Button } from "../components/ui/button";
-import { Loader } from "lucide-react";
+import { Input } from "../components/ui/input";
+import { Textarea } from "../components/ui/textarea";
 
-
-
-interface FileUploadProps{
-  onSuccess: (res: IKUploadResponse) => void;
-  onProgress?: (progress: number) => void;
-  fileType?:"image" | "video";
-}
-
-export default function FileUpload({
-  onSuccess,
-  onProgress,
-  fileType="image",
-}: FileUploadProps) {
+export default function Upload() {
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState<string|null>(null)
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [caption, setCaption] = useState("");
+  const [tags, setTags] = useState("");
 
-  const onError = (err:{message:string})=>{
-    setError(err.message);
+  const handleVideoUploadSuccess = (res: IKUploadResponse) => {
+    setVideoUrl(res.url);
     setUploading(false);
-  };
-  const handleSuccess = (response: IKUploadResponse)=>{
-    setUploading(false);
-    setError(null);
-    onSuccess(response);
+    setUploadProgress(100);
   };
 
-  const handleStartUpload = ()=>{
+  const handleVideoProgress = (progress: number) => {
     setUploading(true);
+    setUploadProgress(progress);
+  };
+
+  const handleRemoveVideo = () => {
+    setVideoUrl(null);
+    setUploadProgress(0);
+    setUploading(false);
     setError(null);
-  }
+  };
 
-  const handleProgress = (evt:ProgressEvent)=>{
-    if(evt.lengthComputable && onProgress){
-      const percentComplete = (evt.loaded/evt.total)*100;
-      onProgress(Math.round(percentComplete));
-    }
-  }
-  const validateFile = (file:File)=>{
-    if(fileType==="video"){
-      if(!file.type.startsWith("video/")){
-        setError("Please upload a valid video file");
-        return false;
-      }
-      if(file.size>100*1024*1024){
-        setError("Video size must be less than 100MB");
-      }
-    }else{
-      const validTypes = ["image/jpeg","image/png","image/webp"];
-      if(!validTypes.includes(file.type)){
-        setError("Please upload a valid image file(JPEG,PNG or WebP");
-        return false;
-      }
-    }
-    return true;
-
-  }
-
-  // Add all the missing state and handler declarations here
-  // (You may need to define: Navigation, Film, Button, Upload, X, Label, Textarea, Input, Image, Loader2, handleSubmit, handleDragEnter, handleDragOver, handleDragLeave, handleDrop, fileInputRef, handleFileChange, videoPreview, handleRemoveVideo, caption, setCaption, tags, setTags, uploadProgress, videoFile, isDragging)
-  // For now, this fix only addresses the misplaced return.
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Here you would typically send videoUrl, caption, tags to your API
+    console.log("Submitted:", { videoUrl, caption, tags });
+  };
 
   return (
     <>
@@ -79,43 +54,25 @@ export default function FileUpload({
 
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+              {/* Left Column */}
               <div>
-                {!videoPreview ? (
-                  <div
-                    className={`relative h-96 border-2 border-dashed rounded-xl bg-black/30 backdrop-blur-md p-6 flex flex-col items-center justify-center transition-all
-                      ${isDragging 
-                        ? "border-indigo-400 bg-indigo-900/20" 
-                        : "border-gray-500 hover:bg-black/40"
-                      } transform transition-transform hover:scale-105 duration-300`}
-                    onDragEnter={handleDragEnter}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                  >
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="video/*"
-                      className="hidden"
-                      onChange={handleFileChange}
-                    />
+                {!videoUrl ? (
+                  <div className="relative h-96 border-2 border-dashed rounded-xl bg-black/30 backdrop-blur-md p-6 flex flex-col items-center justify-center transition-all border-gray-500 hover:bg-black/40 transform hover:scale-105 duration-300">
                     <div className="flex flex-col items-center text-center">
                       <Film className="h-12 w-12 text-gray-400 mb-4" />
                       <h3 className="text-lg font-medium mb-2">Drag and drop your video</h3>
                       <p className="text-sm text-gray-400 mb-6">MP4, WebM, or OGG. Max 100MB.</p>
-                      <Button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg hover:opacity-90 transition-all px-6 py-2 flex items-center"
-                      >
-                        <Upload className="mr-2 h-4 w-4" />
-                        Select File
-                      </Button>
+
+                      <FileUpload
+                        onSuccess={handleVideoUploadSuccess}
+                        onProgress={handleVideoProgress}
+                        fileType="video"
+                      />
                     </div>
                   </div>
                 ) : (
                   <div className="relative h-96 rounded-lg overflow-hidden bg-black shadow-lg">
-                    <video src={videoPreview} className="h-full w-full object-contain" controls />
+                    <video src={videoUrl} className="h-full w-full object-contain" controls />
                     <Button
                       type="button"
                       className="absolute top-2 right-2 rounded-full bg-red-600 text-white hover:bg-red-700 shadow-md transition"
@@ -125,11 +82,10 @@ export default function FileUpload({
                     </Button>
                   </div>
                 )}
-                {error && (
-                  <p className="mt-2 text-red-500 text-sm text-center">{error}</p>
-                )}
+                {error && <p className="mt-2 text-red-500 text-sm text-center">{error}</p>}
               </div>
 
+              {/* Right Column */}
               <div className="space-y-8">
                 <div className="space-y-2">
                   <Label htmlFor="caption" className="text-white font-semibold">Caption</Label>
@@ -196,7 +152,7 @@ export default function FileUpload({
                   <Button
                     type="submit"
                     className="w-full rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg hover:opacity-90 transition-all px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center"
-                    disabled={!videoFile || uploading}
+                    disabled={!videoUrl || uploading}
                   >
                     {uploading ? (
                       <>
@@ -215,8 +171,4 @@ export default function FileUpload({
       </div>
     </>
   );
-
 }
-
-  
-
