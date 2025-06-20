@@ -57,4 +57,14 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   }
 }
 
+export function useNotification(){
+    const context = useContext(NotificationContext);
+    if(context== undefined){
+        throw new Error(
+            "usenotification must be used with a notificationProvider"
+        );
+    }
+    return context;
+}
+
 
