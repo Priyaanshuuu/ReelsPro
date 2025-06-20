@@ -34,8 +34,8 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
             {children}
             {notification && (
                 <div className="toast toast-bottom toast-end z-[100]">
-                    <div className={`alert ${getAlertClass(NotificationContext.type)}`}>
-                        <span>{Notification.message}</span>
+                    <div className={`alert ${getAlertClass(notification.type)}`}>
+                        <span>{notification.message}</span>
                     </div>
                 </div>
             )}
@@ -46,7 +46,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   switch (type) {
     case "success":
       return "alert-success";
-    case "error":
+    case "Error":
       return "alert-error";
     case "warning":
       return "alert-warning";
