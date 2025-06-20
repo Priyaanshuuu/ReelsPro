@@ -36,13 +36,25 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
                 <div className="toast toast-bottom toast-end z-[100]">
                     <div className={`alert ${getAlertClass(NotificationContext.type)}`}>
                         <span>{Notification.message}</span>
-
                     </div>
-
                 </div>
             )}
         </NotificationContext.Provider>
     )
     };
+       function getAlertClass(type: NotificationType): string {
+  switch (type) {
+    case "success":
+      return "alert-success";
+    case "error":
+      return "alert-error";
+    case "warning":
+      return "alert-warning";
+    case "info":
+      return "alert-info";
+    default:
+      return "alert-info";
+  }
+}
 
 
