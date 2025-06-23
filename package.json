@@ -43,6 +43,7 @@
     "embla-carousel-react": "^8.0.0",
     "geist": "^1.2.2",
     "imagekit": "^5.0.0",
+    "imagekitio-next": "^1.0.1",
     "input-otp": "^1.1.0",
     "lucide-react": "^0.344.0",
     "mongoose": "^8.2.1",

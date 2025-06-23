@@ -1,7 +1,7 @@
 // pages/Upload.tsx
 
 import { useState } from "react";
-import { IKUploadResponse } from "imagekitio-next/dist/types/components/IKUpload/props";
+import { IKUploadResponse } from "imagekitio-next";
 import FileUpload from "../components/FileUpload";
 import Navigation from "../components/navigation";
 import { Film, Image, X, Loader } from "lucide-react";
