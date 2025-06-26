@@ -8,12 +8,19 @@ import { Label } from "../components/ui/label";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
-import ImageKit from "imagekit-javascript"
-import { set } from "mongoose";
+import ImageKit from "imagekit-javascript";
 
 interface UploadResponse {
   url: string;
   [key: string]: unknown;
+}
+
+interface ImageKitAuth {
+  signature: string;
+  token: string;
+  expire: number;
+  urlEndpoint: string;
+  publicKey: string;
 }
 
 export default function Upload() {
@@ -60,31 +67,52 @@ export default function Upload() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Submitted:", { videoUrl, caption, tags, selectedThumbnail });
-    // Optional: Add your backend API call here
+    console.log("Submitted:", { videoUrl, thumbnailUrl, caption, tags, selectedThumbnail });
+    // Optional: Connect to backend API here
   };
 
   const handleThumbnailFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
     setThumbnailUploading(true);
+    setError(null);
 
-    const authres = await fetch("../api/imagekit-auth/route.ts");
-    const auth = await authres.json();
+    try {
+      const authRes = await fetch("/api/imagekit-auth");
+      const auth: ImageKitAuth = await authRes.json();
 
-    const ik = new ImageKit({
-      publicKey: process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY!,
-      urlEndpoint: auth.urlEndpoint,
-    });
-    ik.upload({
-      file,
-      fileName: file.name,
-      tags: ["reelspro-thumbnail"],
-      signature: auth.signature,
-      token: auth.token,
-      expire: auth.expire,
-    })
-  }
+      const ik = new ImageKit({
+        publicKey: auth.publicKey,
+        urlEndpoint: auth.urlEndpoint,
+        //authenticationEndpoint: "", // not needed because you're providing signature/token manually
+      });
+
+      ik.upload(
+        {
+          file,
+          fileName: file.name,
+          tags: ["reelspro-thumbnail"],
+          signature: auth.signature,
+          token: auth.token,
+          expire: auth.expire,
+        },
+        (err, result) => {
+          setThumbnailUploading(false);
+          if (err || !result) {
+            setError("Thumbnail upload failed.");
+            console.error("Thumbnail upload error:", err);
+          } else {
+            setThumbnailUrl(result.url);
+          }
+        }
+      );
+    } catch (err) {
+      setError("Failed to authenticate with ImageKit.");
+      setThumbnailUploading(false);
+      console.error("Auth error:", err);
+    }
+  };
 
   return (
     <>
@@ -95,7 +123,7 @@ export default function Upload() {
           <p className="text-gray-400 mb-8">Share your video with the ReelsPro community</p>
 
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Video Upload Section */}
+            {/* Video Upload */}
             <div>
               {!videoUrl ? (
                 <div className="h-96 border-2 border-dashed border-gray-500 rounded-xl bg-black/30 backdrop-blur-md p-6 flex flex-col items-center justify-center hover:bg-black/40 transition-transform transform hover:scale-105">
@@ -119,16 +147,16 @@ export default function Upload() {
               {error && <p className="text-sm text-red-500 mt-2 text-center">{error}</p>}
             </div>
 
-            {/* Metadata Inputs */}
+            {/* Right Section */}
             <div className="space-y-6">
               <div>
-                <Label htmlFor="caption" className="font-semibold text-white">Caption</Label>
+                <Label htmlFor="caption">Caption</Label>
                 <Textarea
                   id="caption"
                   placeholder="Write a caption..."
-                  className="resize-none min-h-[100px] bg-black/20 border border-gray-600 rounded-md text-white placeholder-gray-400 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   value={caption}
                   onChange={(e) => setCaption(e.target.value)}
+                  className="resize-none min-h-[100px] bg-black/20 border border-gray-600 rounded-md text-white"
                   maxLength={150}
                   disabled={uploading}
                 />
@@ -136,43 +164,36 @@ export default function Upload() {
               </div>
 
               <div>
-                <Label htmlFor="tags" className="font-semibold text-white">Tags</Label>
+                <Label htmlFor="tags">Tags</Label>
                 <Input
                   id="tags"
                   placeholder="Add tags separated by commas"
-                  className="bg-black/20 border border-gray-600 rounded-md text-white placeholder-gray-400 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   value={tags}
                   onChange={(e) => setTags(e.target.value)}
+                  className="bg-black/20 border border-gray-600 rounded-md text-white"
                   disabled={uploading}
                 />
               </div>
 
-              {/* Thumbnail Selection */}
               <div>
-                <Label className="font-semibold text-white">Thumbnail</Label>
-                <div className="bg-black/30 border border-gray-600 rounded-lg p-4 backdrop-blur-md">
+                <Label>Thumbnail</Label>
+                <div className="bg-black/30 border border-gray-600 rounded-lg p-4">
                   <div className="flex items-center gap-2 text-gray-400 mb-3">
                     <Image className="h-5 w-5" />
                     <span className="text-sm">Choose a thumbnail</span>
                   </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    {[1, 2, 3].map((i) => (
-                      <div
-                        key={i}
-                        onClick={() => setSelectedThumbnail(i)}
-                        className={`aspect-[9/16] flex items-center justify-center rounded-lg font-bold cursor-pointer transition-all shadow-lg 
-                          ${selectedThumbnail === i
-                            ? "bg-indigo-600 ring-2 ring-indigo-300"
-                            : "bg-white/10 hover:bg-white/20 hover:ring-2 hover:ring-indigo-400"}`}
-                      >
-                        {i}
-                      </div>
-                    ))}
-                  </div>
+                  <Input type="file" accept="image/*" onChange={handleThumbnailFile} />
+                  {thumbnailUploading && <p className="text-sm text-indigo-400 mt-2">Uploading thumbnail...</p>}
+                  {thumbnailUrl && (
+                    <img
+                      src={thumbnailUrl}
+                      alt="Thumbnail"
+                      className="mt-3 rounded-lg border border-gray-500 w-32 h-auto"
+                    />
+                  )}
                 </div>
               </div>
 
-              {/* Upload Progress */}
               {uploading && (
                 <div>
                   <div className="flex justify-between text-sm text-gray-400 mb-1">
@@ -188,10 +209,9 @@ export default function Upload() {
                 </div>
               )}
 
-              {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg hover:opacity-90 px-6 py-3 flex items-center justify-center disabled:opacity-50"
+                className="w-full rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg hover:opacity-90 px-6 py-3 disabled:opacity-50"
                 disabled={!videoUrl || uploading}
               >
                 {uploading ? (
