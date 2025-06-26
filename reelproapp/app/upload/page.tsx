@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { IKUploadResponse } from "imagekitio-next";
-import FileUpload from "../components/FileUpload";
+import FileUpload from "../components/file-upload/page";
 import Navigation from "../components/navigation";
 import { Film, Image, X, Loader } from "lucide-react";
 import { Label } from "../components/ui/label";
