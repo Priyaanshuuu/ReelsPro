@@ -2,7 +2,7 @@
 import { IKUpload } from 'imagekitio-react';
 
 interface FileUploadProps {
-  onSuccess: (res: any) => void;
+  onSuccess: (res: unknown) => void;
   onProgress: (progress: number) => void;
 }
 
@@ -19,7 +19,6 @@ export default function FileUpload({ onSuccess, onProgress }: FileUploadProps) {
         onProgress(percent);
       }}
       className="your-optional-classes"
-      fileType="video"
     />
   );
 }
