@@ -8,6 +8,8 @@ import { Label } from "../components/ui/label";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
+import ImageKit from "imagekit-javascript"
+import { set } from "mongoose";
 
 interface UploadResponse {
   url: string;
@@ -22,6 +24,8 @@ export default function Upload() {
   const [caption, setCaption] = useState("");
   const [tags, setTags] = useState("");
   const [selectedThumbnail, setSelectedThumbnail] = useState<number | null>(null);
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+  const [thumbnailUploading, setThumbnailUploading] = useState(false);
 
   const handleVideoUploadSuccess = (res: unknown) => {
     if (
@@ -59,6 +63,28 @@ export default function Upload() {
     console.log("Submitted:", { videoUrl, caption, tags, selectedThumbnail });
     // Optional: Add your backend API call here
   };
+
+  const handleThumbnailFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setThumbnailUploading(true);
+
+    const authres = await fetch("../api/imagekit-auth/route.ts");
+    const auth = await authres.json();
+
+    const ik = new ImageKit({
+      publicKey: process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY!,
+      urlEndpoint: auth.urlEndpoint,
+    });
+    ik.upload({
+      file,
+      fileName: file.name,
+      tags: ["reelspro-thumbnail"],
+      signature: auth.signature,
+      token: auth.token,
+      expire: auth.expire,
+    })
+  }
 
   return (
     <>
