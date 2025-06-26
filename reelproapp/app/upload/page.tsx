@@ -1,7 +1,7 @@
 // pages/Upload.tsx
 
 import { useState } from "react";
-import { IKUploadResponse } from "imagekitio-next";
+// import { IKUploadResponse } from "imagekitio-next";
 import FileUpload from "../components/file-upload/page";
 import Navigation from "../components/navigation";
 import { Film, Image, X, Loader } from "lucide-react";
@@ -18,10 +18,20 @@ export default function Upload() {
   const [caption, setCaption] = useState("");
   const [tags, setTags] = useState("");
 
-  const handleVideoUploadSuccess = (res: IKUploadResponse) => {
-    setVideoUrl(res.url);
-    setUploading(false);
-    setUploadProgress(100);
+  interface UploadResponse {
+    url: string;
+    [key: string]: unknown;
+  }
+
+  const handleVideoUploadSuccess = (res: unknown) => {
+    if (res && typeof res === "object" && "url" in res && typeof (res as UploadResponse).url === "string") {
+      setVideoUrl((res as UploadResponse).url);
+      setUploading(false);
+      setUploadProgress(100);
+    } else {
+      setUploading(false);
+      setError("Upload response is invalid.");
+    }
   };
 
   const handleVideoProgress = (progress: number) => {
@@ -66,7 +76,6 @@ export default function Upload() {
                       <FileUpload
                         onSuccess={handleVideoUploadSuccess}
                         onProgress={handleVideoProgress}
-                        fileType="video"
                       />
                     </div>
                   </div>
