@@ -1,4 +1,3 @@
-// pages/Upload.tsx
 "use client";
 
 import { useState } from "react";
@@ -10,6 +9,11 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 
+interface UploadResponse {
+  url: string;
+  [key: string]: unknown;
+}
+
 export default function Upload() {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -19,14 +23,16 @@ export default function Upload() {
   const [tags, setTags] = useState("");
   const [selectedThumbnail, setSelectedThumbnail] = useState<number | null>(null);
 
-  interface UploadResponse {
-    url: string;
-    [key: string]: unknown;
-  }
-
   const handleVideoUploadSuccess = (res: unknown) => {
-    if (res && typeof res === "object" && "url" in res && typeof (res as UploadResponse).url === "string") {
-      setVideoUrl((res as UploadResponse).url);
+    if (
+      res &&
+      typeof res === "object" &&
+      res !== null &&
+      "url" in res &&
+      typeof (res as UploadResponse).url === "string"
+    ) {
+      const typedRes = res as UploadResponse;
+      setVideoUrl(typedRes.url);
       setUploading(false);
       setUploadProgress(100);
     } else {
@@ -51,6 +57,7 @@ export default function Upload() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Submitted:", { videoUrl, caption, tags, selectedThumbnail });
+    // Optional: Add your backend API call here
   };
 
   return (
@@ -130,8 +137,7 @@ export default function Upload() {
                         className={`aspect-[9/16] flex items-center justify-center rounded-lg font-bold cursor-pointer transition-all shadow-lg 
                           ${selectedThumbnail === i
                             ? "bg-indigo-600 ring-2 ring-indigo-300"
-                            : "bg-white/10 hover:bg-white/20 hover:ring-2 hover:ring-indigo-400"}
-                          `}
+                            : "bg-white/10 hover:bg-white/20 hover:ring-2 hover:ring-indigo-400"}`}
                       >
                         {i}
                       </div>
