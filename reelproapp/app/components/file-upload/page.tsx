@@ -9,12 +9,12 @@ interface FileUploadProps {
 export default function FileUpload({ onSuccess, onProgress }: FileUploadProps) {
   const publicKey = process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY;
   const urlEndpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT;
-  const authenticationEndpoint = "../../api/imagekit-auth/route.ts";
+  const authenticationEndpointt = "/api/imagekit-auth";
   return (
     <IKContext
       publicKey={publicKey!}
       urlEndpoint={urlEndpoint!}
-      authenticationEndpoint={authenticationEndpoint}
+      authenticationEndpoint={authenticationEndpointt}
     >
       <IKUpload
         fileName="video-upload.mp4"
