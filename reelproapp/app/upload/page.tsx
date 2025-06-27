@@ -79,7 +79,7 @@ export default function Upload() {
     setError(null);
 
     try {
-      const authRes = await fetch("/api/imagekit-auth");
+      const authRes = await fetch("../api/imagekit-auth/route.ts");
       const auth: ImageKitAuth = await authRes.json();
 
       const ik = new ImageKit({
