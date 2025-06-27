@@ -9,7 +9,7 @@ interface FileUploadProps {
 export default function FileUpload({ onSuccess, onProgress }: FileUploadProps) {
   const publicKey = process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY;
   const urlEndpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT;
-  const authenticationEndpoint = "/api/imagekit-auth";
+  const authenticationEndpoint = "../../api/imagekit-auth/route.ts";
   return (
     <IKContext
       publicKey={publicKey!}
