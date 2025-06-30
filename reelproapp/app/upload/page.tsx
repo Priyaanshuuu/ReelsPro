@@ -19,8 +19,6 @@ interface ImageKitAuth {
   signature: string;
   token: string;
   expire: number;
-  urlEndpoint: string;
-  publicKey: string;
 }
 
 export default function Upload() {
@@ -71,23 +69,24 @@ export default function Upload() {
     // Optional: Connect to backend API here
   };
 
- const handleThumbnailFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleThumbnailFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
   const file = e.target.files?.[0];
-  if (!file) return;
+  if (!file) {
+    setError("No file selected.");
+    return;
+  }
 
   setThumbnailUploading(true);
   setError(null);
 
   try {
-    // ✅ Only get signature/token/expire from backend
     const authRes = await fetch("/api/imagekit-auth");
     const auth = await authRes.json();
 
     if (!auth.signature || !auth.token || !auth.expire) {
-      throw new Error("Invalid authentication parameters");
+      throw new Error("Invalid authentication parameters.");
     }
 
-    // ✅ Public key and endpoint from env
     const ik = new ImageKit({
       publicKey: process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY!,
       urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!,
@@ -104,16 +103,18 @@ export default function Upload() {
       },
       (err, result) => {
         setThumbnailUploading(false);
-        if (err || !result) {
-          setError("Thumbnail upload failed.");
-          console.error("Thumbnail upload error:", err);
+        console.log("Upload callback - err:", err);
+        console.log("Upload callback - result:", result);
+
+        if ((err && Object.keys(err).length > 0) || !result) {
+          setError(`Thumbnail upload failed: ${err?.message ?? "Unknown error"}`);
         } else {
           setThumbnailUrl(result.url);
         }
       }
     );
-  } catch (err) {
-    setError("Failed to authenticate with ImageKit.");
+  } catch (err: any) {
+    setError(`Failed to authenticate: ${err.message}`);
     setThumbnailUploading(false);
     console.error("Auth error:", err);
   }

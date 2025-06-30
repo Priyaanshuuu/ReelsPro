@@ -29,6 +29,7 @@ export default function FileUpload({ onSuccess, onProgress }: FileUploadProps) {
       authenticator={authenticator}
     >
       <IKUpload
+      accept="video/*"
         fileName="video-upload.mp4"
         useUniqueFileName={true}
         folder="/videos"
