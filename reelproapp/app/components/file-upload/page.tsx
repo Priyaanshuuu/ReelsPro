@@ -1,5 +1,7 @@
-// components/FileUpload.tsx
-import { IKUpload, IKContext } from 'imagekitio-react';
+"use client";
+
+import { IKUpload, IKContext } from "imagekitio-react";
+import { useCallback } from "react";
 
 interface FileUploadProps {
   onSuccess: (res: unknown) => void;
@@ -7,14 +9,24 @@ interface FileUploadProps {
 }
 
 export default function FileUpload({ onSuccess, onProgress }: FileUploadProps) {
-  const publicKey = process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY;
-  const urlEndpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT;
-  const authenticationEndpointt = "/api/imagekit-auth";
+  const publicKey = process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY!;
+  const urlEndpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!;
+
+  // Yeh naya authenticator function hai jo /api/imagekit-auth se signature fetch karega
+  const authenticator = useCallback(async () => {
+    const response = await fetch("/api/imagekit-auth");
+    if (!response.ok) {
+      throw new Error("Failed to fetch authentication parameters");
+    }
+    const data = await response.json();
+    return data; // { signature, expire, token }
+  }, []);
+
   return (
     <IKContext
-      publicKey={publicKey!}
-      urlEndpoint={urlEndpoint!}
-      authenticationEndpoint={authenticationEndpointt}
+      publicKey={publicKey}
+      urlEndpoint={urlEndpoint}
+      authenticator={authenticator}
     >
       <IKUpload
         fileName="video-upload.mp4"
