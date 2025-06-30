@@ -71,48 +71,54 @@ export default function Upload() {
     // Optional: Connect to backend API here
   };
 
-  const handleThumbnailFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+ const handleThumbnailFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
 
-    setThumbnailUploading(true);
-    setError(null);
+  setThumbnailUploading(true);
+  setError(null);
 
-    try {
-      const authRes = await fetch("/api/imagekit-auth");
-      const auth: ImageKitAuth = await authRes.json();
+  try {
+    // ✅ Only get signature/token/expire from backend
+    const authRes = await fetch("/api/imagekit-auth");
+    const auth = await authRes.json();
 
-      const ik = new ImageKit({
-        publicKey: auth.publicKey,
-        urlEndpoint: auth.urlEndpoint,
-        //authenticationEndpoint: "", // not needed because you're providing signature/token manually
-      });
-
-      ik.upload(
-        {
-          file,
-          fileName: file.name,
-          tags: ["reelspro-thumbnail"],
-          signature: auth.signature,
-          token: auth.token,
-          expire: auth.expire,
-        },
-        (err, result) => {
-          setThumbnailUploading(false);
-          if (err || !result) {
-            setError("Thumbnail upload failed.");
-            console.error("Thumbnail upload error:", err);
-          } else {
-            setThumbnailUrl(result.url);
-          }
-        }
-      );
-    } catch (err) {
-      setError("Failed to authenticate with ImageKit.");
-      setThumbnailUploading(false);
-      console.error("Auth error:", err);
+    if (!auth.signature || !auth.token || !auth.expire) {
+      throw new Error("Invalid authentication parameters");
     }
-  };
+
+    // ✅ Public key and endpoint from env
+    const ik = new ImageKit({
+      publicKey: process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY!,
+      urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!,
+    });
+
+    ik.upload(
+      {
+        file,
+        fileName: file.name,
+        tags: ["reelspro-thumbnail"],
+        signature: auth.signature,
+        token: auth.token,
+        expire: auth.expire,
+      },
+      (err, result) => {
+        setThumbnailUploading(false);
+        if (err || !result) {
+          setError("Thumbnail upload failed.");
+          console.error("Thumbnail upload error:", err);
+        } else {
+          setThumbnailUrl(result.url);
+        }
+      }
+    );
+  } catch (err) {
+    setError("Failed to authenticate with ImageKit.");
+    setThumbnailUploading(false);
+    console.error("Auth error:", err);
+  }
+};
+
 
   return (
     <>
