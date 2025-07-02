@@ -9,11 +9,13 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import ImageKit from "imagekit-javascript";
+import { useSession } from "next-auth/react";
 
 interface UploadResponse {
   url: string;
   [key: string]: unknown;
 }
+
 
 interface ImageKitAuth {
   signature: string;
@@ -31,6 +33,7 @@ export default function Upload() {
   const [selectedThumbnail, setSelectedThumbnail] = useState<number | null>(null);
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const [thumbnailUploading, setThumbnailUploading] = useState(false);
+  const { data: session } = useSession();
 
   const handleVideoUploadSuccess = (res: unknown) => {
     if (
@@ -65,8 +68,8 @@ export default function Upload() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Submitted:", { videoUrl, thumbnailUrl, caption, tags, selectedThumbnail });
-    // Optional: Connect to backend API here
+    
+    
   };
 
   const handleThumbnailFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
