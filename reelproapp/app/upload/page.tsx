@@ -253,6 +253,7 @@ export default function Upload() {
 
               <Button
                 type="submit"
+                onClick={handleSubmit}
                 className="w-full rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg hover:opacity-90 px-6 py-3 disabled:opacity-50"
                 disabled={!videoUrl || uploading}
               >
