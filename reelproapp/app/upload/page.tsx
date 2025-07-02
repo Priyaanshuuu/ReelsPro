@@ -79,7 +79,7 @@ export default function Upload() {
       return;
     }
     try {
-      const res = await fetch("/api/upload", {
+      const res = await fetch("/api/reels", {
         method: "POST",
         headers:{
           "Content-Type": "application/json"
