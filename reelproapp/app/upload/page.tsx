@@ -34,6 +34,7 @@ export default function Upload() {
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const [thumbnailUploading, setThumbnailUploading] = useState(false);
   const { data: session } = useSession();
+  const userId = session?.user?.id;
 
   const handleVideoUploadSuccess = (res: unknown) => {
     if (
@@ -66,10 +67,41 @@ export default function Upload() {
     setSelectedThumbnail(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    
+    if(!videoUrl||!thumbnailUrl){
+      setError("Please upload both video and thumbnail before submitting.");
+      return;
+    }
+
+    if(!userId){
+      setError("User not logged In");
+      return;
+    }
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        headers:{
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          videoUrl,
+          thumbnailUrl,
+          caption,
+          tags: tags.split(",").map(tag => tag.trim()),
+          userId
+        })
+      })
+      if(res.ok){
+        alert("Video uploaded successfully!");
+      }else{
+        const data = await res.json();
+        setError(data.error||"Failed to pot reel");
+      }
+    } catch (error) {
+      setError("An error occurred while uploading the video.");
+      console.error("Upload error:", error);
+    }
   };
 
   const handleThumbnailFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
