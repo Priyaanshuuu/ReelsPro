@@ -19,7 +19,7 @@ const ReelSchema = new Schema(
       default: [],
     },
     user: {
-      type: Schema.Types.ObjectId,
+      type: [String],
       ref: "User",
       required: true,
     },
