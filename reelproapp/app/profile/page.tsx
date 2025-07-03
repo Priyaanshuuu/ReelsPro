@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Play, Heart, MessageCircle, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 //import { ReelType } from "@/lib/types";
 
 interface Reel {
-  id: string;
+  _id: string;
+  videoUrl: string;
   thumbnailUrl: string;
   likes: number;
   comments: number;
@@ -21,6 +23,17 @@ interface ReelGridProps {
 export default function ReelGrid({ reels = [] }: ReelGridProps) {
   const router = useRouter();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [reels, setReels] = useState<Reel[]>([]);
+  const userId = session?.user?.id;
+  const {data: session} = useSession();
+
+  useEffect(()=>{
+    if(!userId)return;
+    fetch(`/api/reels?userId=${userId}`)
+    .then((res)=>res.json)
+    .then((data)=> setReels(data));
+  },
+  [userId])
 
   if (reels.length === 0) {
     return (
@@ -43,7 +56,7 @@ export default function ReelGrid({ reels = [] }: ReelGridProps) {
             className="relative aspect-[9/16] bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] rounded-lg overflow-hidden cursor-pointer group transition-all shadow-md hover:shadow-xl"
             onMouseEnter={() => setHoveredIndex(index)}
             onMouseLeave={() => setHoveredIndex(null)}
-            onClick={() => router.push(`/reel/${reel.id}`)}
+            onClick={() => router.push(`/reel/${reel._id}`)}
           >
             {/* Thumbnail */}
             <div
