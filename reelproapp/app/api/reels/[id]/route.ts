@@ -11,6 +11,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     }
     return NextResponse.json(reel, { status: 200 });
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: "Failed to fetch reel" }, { status: 500 });
   }
 }
