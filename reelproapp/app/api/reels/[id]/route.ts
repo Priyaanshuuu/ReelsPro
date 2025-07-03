@@ -2,10 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/lib/db";
 import Reel from "@/models/Reel.model";
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(
+  request: NextRequest,
+  context: { params: { id: string } }
+) {
   try {
     await dbConnect();
-    const reel = await Reel.findById(params.id);
+    const { id } = await context.params;
+    const reel = await Reel.findById(id);
     if (!reel) {
       return NextResponse.json({ error: "Reel not found" }, { status: 404 });
     }
