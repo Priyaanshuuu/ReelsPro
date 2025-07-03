@@ -16,22 +16,18 @@ interface Reel {
   isPrivate: boolean;
 }
 
-interface ReelGridProps {
-  reels?: Reel[];
-}
-
-export default function ReelGrid({ reels = [] }: ReelGridProps) {
+export default function ReelGrid() {
   const router = useRouter();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [reels, setReels] = useState<Reel[]>([]);
-  const userId = session?.user?.id;
   const {data: session} = useSession();
+  const userId = session?.user?.id;
 
   useEffect(()=>{
     if(!userId)return;
     fetch(`/api/reels?userId=${userId}`)
-    .then((res)=>res.json)
-    .then((data)=> setReels(data));
+    .then((res) => res.json())
+    .then((data) => setReels(data));
   },
   [userId])
 
