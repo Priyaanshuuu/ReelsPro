@@ -116,7 +116,7 @@ export default function FeedPage() {
         className="min-h-screen w-full flex justify-center items-center snap-center relative"
         style={{ scrollSnapAlign: "center" }}
       >
-        <div className="relative w-[360px] max-w-full aspect-[9/16] flex flex-col items-center justify-center rounded-xl overflow-hidden shadow-2xl border border-gray-700 bg-black my-8">
+        <div className="relative w-[360px] max-w-full aspect-[9/16] flex flex-col items-center justify-center rounded-xl overflow-hidden shadow-2xl border border-gray-700 bg-black">
           <VideoPlayer
             video={{
               id: typeof video._id === "string" ? Number(video._id) || 0 : 0,
