@@ -107,12 +107,12 @@ export default function FeedPage() {
       <Navigation />
       <div
         ref={videoContainerRef}
-        className="flex justify-center items-center min-h-screen w-full snap-start snap-always relative bg-black"
+        className="fh-screen w-full overflow-y-scroll snap-y snap-mandatory flex flex-col items-center bg-black"
       >
         {reels.map((video, index) => (
           <div
             key={video._id}
-            className="relative w-[360px] max-w-full aspect-[9/16] flex flex-col items-center justify-center rounded-xl overflow-hidden shadow-lg border border-gray-700 bg-black"
+            className="snap-center flex justify-center items-center h-screen w-full"
           >
             <VideoPlayer
               video={{
