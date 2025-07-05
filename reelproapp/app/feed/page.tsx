@@ -19,6 +19,10 @@ type Reel = {
   likes?: number;
   comments?: number;
   shares?: number;
+  user?: {
+    _id?: string;
+    name?: string;
+  };
 };
 
 export default function FeedPage() {
@@ -103,7 +107,7 @@ export default function FeedPage() {
   }
 
   return (
-    <>
+   <>
   <Navigation />
   <div
     ref={videoContainerRef}
@@ -120,7 +124,7 @@ export default function FeedPage() {
           <VideoPlayer
             video={{
               id: typeof video._id === "string" ? Number(video._id) || 0 : 0,
-              username: video.username || "user",
+              username: video.user?.name || "user",
               date: video.date || "",
               caption: video.caption,
               audio: video.audio || "Original Audio",
@@ -137,12 +141,17 @@ export default function FeedPage() {
           <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
             <div className="max-w-screen-sm mx-auto">
               <div className="flex items-start mb-2">
-                <Link href={`/profile/${video.username || "user"}`} className="flex items-center">
+                <Link
+                  href={`/profile/${video.user?._id || "user"}`}
+                  className="flex items-center"
+                >
                   <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-border mr-3">
                     <User className="h-5 w-5 text-primary-foreground" />
                   </div>
                   <div>
-                    <p className="font-medium text-white">@{video.username || "user"}</p>
+                    <p className="font-medium text-white">
+                      @{video.user?.name || "user"}
+                    </p>
                     <p className="text-xs text-white/70">{video.date || ""}</p>
                   </div>
                 </Link>
