@@ -18,7 +18,7 @@ export default function ProfilePage() {
     if (!id) return;
     fetch(`/api/reels?userId=${id}`)
       .then(res => res.json())
-      .then(data => setReels(data));
+      .then(data => setReels(Array.isArray(data)? data: []));
   }, [id]);
 
   return (

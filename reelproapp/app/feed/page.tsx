@@ -35,7 +35,7 @@ export default function FeedPage() {
 
   // Fetch all reels from API
   useEffect(() => {
-    fetch(`api/reels?userId=${id}`)
+    fetch("api/reels")
       .then((res) => res.json())
       .then((data) => setReels(Array.isArray(data)? data: []));
   }, []);
