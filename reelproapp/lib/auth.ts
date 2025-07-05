@@ -6,6 +6,13 @@ import bcrypt from "bcryptjs";
 import { dbConnect } from "./db";
 import User from "../models/User.model";
 
+// Extend the User type to include _id
+declare module "next-auth" {
+  interface User {
+    _id?: string;
+  }
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -34,7 +41,8 @@ export const authOptions: NextAuthOptions = {
           }
 
           return {
-            id: user._id.toString(),
+            id: user._id.toString(), // Required by NextAuth User type
+            _id: user._id.toString(), // Custom property for your use
             email: user.email,
           };
         } catch (error) {
@@ -55,20 +63,20 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
 
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string;
-      }
-      return session;
-    },
+callbacks: {
+  async session({ session, token }) {
+    if (session.user && token._id) {
+      session.user._id = token._id;
+    }
+    return session;
   },
+  async jwt({ token, user }) {
+    if (user) {
+      token._id = user._id?.toString() || user.id;
+    }
+    return token;
+  },
+},
 
   pages: {
     signIn: "/signup",

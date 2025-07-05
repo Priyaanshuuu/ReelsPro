@@ -7,6 +7,7 @@ import Navigation from "@/app/components/navigation";
 import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Music, User } from "lucide-react";
 import VideoPlayer from "@/app/components/video/page";
 import { useToast } from "@/app/hooks/use-toast";
+import { log } from "console";
 
 type Reel = {
   _id: string;
@@ -37,7 +38,10 @@ export default function FeedPage() {
   useEffect(() => {
     fetch("api/reels")
       .then((res) => res.json())
-      .then((data) => setReels(Array.isArray(data)? data: []));
+      .then((data) => {
+        console.log("API Data:", data);
+        setReels(Array.isArray(data) ? data : []);
+      });
   }, []);
 
   // Handle video scrolling

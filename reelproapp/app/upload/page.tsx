@@ -34,7 +34,7 @@ export default function Upload() {
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const [thumbnailUploading, setThumbnailUploading] = useState(false);
   const { data: session } = useSession();
-  const userId = session?.user?.id;
+  const userId = session?.user?._id;
 
   const handleVideoUploadSuccess = (res: unknown) => {
     if (

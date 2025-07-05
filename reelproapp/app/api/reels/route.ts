@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/lib/db";
 import Reel from "@/models/Reel.model";
+import mongoose from "mongoose";
 
 export async function POST(request:NextRequest) {
     try {
@@ -31,17 +32,21 @@ export async function POST(request:NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
+    await dbConnect();
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get("userId");
-    await dbConnect();
     let reels;
     if (userId) {
-      reels = await Reel.find({ user: userId }).sort({ createdAt: -1 }).populate("user", "name");
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return Response.json({ error: "Invalid userId" }, { status: 400 });
+      }
+      reels = await Reel.find({ user: userId }).populate("user", "name _id").sort({ createdAt: -1 });
     } else {
-      reels = await Reel.find({}).populate("user","name").sort({ createdAt: -1 });
+      reels = await Reel.find({}).populate("user", "name _id").sort({ createdAt: -1 });
     }
-    return NextResponse.json(reels, { status: 200 });
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch reels" }, { status: 500 });
+    return Response.json(reels);
+  } catch (err) {
+    console.error("API ERROR:", err);
+    return Response.json({ error: err.message }, { status: 500 });
   }
 }
