@@ -1,4 +1,4 @@
-import   { Schema, models, model } from "mongoose";
+import mongoose, { Schema, models, model } from "mongoose";
 
 const ReelSchema = new Schema(
   {
@@ -19,7 +19,7 @@ const ReelSchema = new Schema(
       default: [],
     },
     user: {
-      type: [String],
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
