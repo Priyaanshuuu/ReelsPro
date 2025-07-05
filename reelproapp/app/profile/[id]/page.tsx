@@ -37,7 +37,7 @@ export default function ProfilePage() {
             All reels uploaded by this user will appear below.
           </p>
         </div>
-        {reels.length === 0 ? (
+        {!Array.isArray(reels)|| reels.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
             <span className="text-white text-lg opacity-70">No reels uploaded yet.</span>
           </div>

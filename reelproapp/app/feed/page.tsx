@@ -35,9 +35,9 @@ export default function FeedPage() {
 
   // Fetch all reels from API
   useEffect(() => {
-    fetch("/api/reels")
+    fetch(`api/reels?userId=${id}`)
       .then((res) => res.json())
-      .then((data) => setReels(data));
+      .then((data) => setReels(Array.isArray(data)? data: []));
   }, []);
 
   // Handle video scrolling
