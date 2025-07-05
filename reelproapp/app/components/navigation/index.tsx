@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -9,6 +10,8 @@ import { cn } from "@/lib/utils";
 export default function Navigation() {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
+  const {data: session} = useSession();
+  const userId = session?.user?.id;
 
   const isLandingPage = pathname === "/";
 
@@ -27,7 +30,7 @@ export default function Navigation() {
     { name: "Discover", href: "/discover", icon: <Compass className="w-6 h-6" /> },
     { name: "Upload", href: "/upload", icon: <PlusSquare className="w-6 h-6" /> },
     { name: "Activity", href: "/activity", icon: <Heart className="w-6 h-6" /> },
-    { name: "Profile", href: "/profile", icon: <UserCircle className="w-6 h-6" /> },
+    { name: "Profile", href: `profile/${userId}`, icon: <UserCircle className="w-6 h-6" /> },
   ];
 
   return (
