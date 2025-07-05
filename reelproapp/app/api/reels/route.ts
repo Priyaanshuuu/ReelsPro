@@ -36,9 +36,9 @@ export async function GET(request: NextRequest) {
     await dbConnect();
     let reels;
     if (userId) {
-      reels = await Reel.find({ user: userId }).sort({ createdAt: -1 });
+      reels = await Reel.find({ user: userId }).sort({ createdAt: -1 }).populate("user", "name");
     } else {
-      reels = await Reel.find({}).sort({ createdAt: -1 });
+      reels = await Reel.find({}).populate("user","name").sort({ createdAt: -1 });
     }
     return NextResponse.json(reels, { status: 200 });
   } catch (error) {
