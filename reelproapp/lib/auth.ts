@@ -71,6 +71,8 @@ callbacks: {
     return token;
   },
   async session({session, token}){
+    console.log("Token in session callback", token);
+    
     if(session.user && token._id){
       session.user._id = token._id;
     }
