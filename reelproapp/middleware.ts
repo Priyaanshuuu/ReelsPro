@@ -2,30 +2,32 @@ import {withAuth} from "next-auth/middleware"
 import { NextResponse} from "next/server"
 
 export default withAuth(
-    function middleware(){
-        return NextResponse.next();
+  function middleware() {
+    return NextResponse.next();
+  },
+  {
+    callbacks: {
+      authorized: ({ token, req }) => {
+        const { pathname } = req.nextUrl;
+
+        // Yahan apne sabhi public routes add karo
+        if (
+          pathname.startsWith("/api/auth") ||
+          pathname === "/login" ||
+          pathname === "/signup" ||
+          pathname.startsWith("/feed") ||
+          pathname === "/" ||
+          pathname.startsWith("/api/videos") ||
+          pathname.startsWith("/upload") ||
+          pathname.startsWith("/activity") ||
+          pathname.startsWith("/profile")
+        ) {
+          return true;
+        }
+        return !!token;
+      },
     },
-    {
-        callbacks:{
-            authorized:({token,req})=>{
-                const {pathname}= req.nextUrl;
-
-                if(
-                    pathname.startsWith("/api/auth")||
-                    pathname === "/login" ||
-                    pathname === "/signup"||
-                    pathname.startsWith("/feed")
-                ){
-                    return true;
-                }
-
-                if(pathname==="/"|| pathname.startsWith("/api/videos")){
-                    return true;
-                }
-                return !!token
-            },
-        },
-    }
+  }
 );
 
 export const config = {
