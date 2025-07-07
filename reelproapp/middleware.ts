@@ -9,6 +9,9 @@ export default withAuth(
     callbacks: {
       authorized: ({ token, req }) => {
         const { pathname } = req.nextUrl;
+          if (pathname.startsWith("/api/")) {
+          return true;
+        }
 
         // Yahan apne sabhi public routes add karo
         if (
