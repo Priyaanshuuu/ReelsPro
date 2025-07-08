@@ -37,11 +37,15 @@ export async function GET(request: NextRequest) {
     const userId = searchParams.get("userId");
     let reels;
     if (userId) {
-      if (!mongoose.Types.ObjectId.isValid(userId)) {
-        return Response.json({ error: "Invalid userId" }, { status: 400 });
-      }
-      reels = await Reel.find({ user: userId }).populate("user", "name _id").sort({ createdAt: -1 });
-    } else {
+  let userQuery;
+  if (mongoose.Types.ObjectId.isValid(userId)) {
+    userQuery = userId;
+  } else {
+    // Google/GitHub waale users ke liye string id bhi allow karo
+    userQuery = userId;
+  }
+  reels = await Reel.find({ user: userQuery }).populate("user", "name _id id").sort({ createdAt: -1 });
+}else {
       reels = await Reel.find({}).populate("user", "name _id").sort({ createdAt: -1 });
     }
     return Response.json(reels);
