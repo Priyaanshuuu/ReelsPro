@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
   }
   reels = await Reel.find({ user: userQuery }).populate("user", "name _id id").sort({ createdAt: -1 });
 }else {
-      reels = await Reel.find({}).populate("user", "name _id").sort({ createdAt: -1 });
+      reels = await Reel.find({}).populate("user", "name _id id").sort({ createdAt: -1 });
     }
     return Response.json(reels);
   } catch (err) {
