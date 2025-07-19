@@ -44,11 +44,22 @@ export async function GET(request: NextRequest) {
     // Google/GitHub waale users ke liye string id bhi allow karo
     userQuery = userId;
   }
-  reels = await Reel.find({ user: userQuery }).populate("user", "name _id id").sort({ createdAt: -1 });
+  reels = await Reel.find({ user: userQuery })
+  .populate("user", "name _id id")
+  .populate("comments.user", "name _id id")
+  .sort({ createdAt: -1 });
 }else {
-      reels = await Reel.find({}).populate("user", "name _id id").sort({ createdAt: -1 });
+      reels = await Reel.find({})
+      .populate("user", "name _id id")
+      .populate("comments.user", "name _id id")
+      .sort({ createdAt: -1 });
     }
-    return Response.json(reels);
+
+    const reelsWithLikeCount = reels.map(reel =>({
+      ...reel.toObject(),
+      likes: Array.isArray(reel.likes)?reel.likes.length: reel.likes,
+    }))
+    return Response.json(reelsWithLikeCount);
   } catch (err) {
     console.error("API ERROR:", err);
     return Response.json({ error: err.message }, { status: 500 });
