@@ -8,6 +8,14 @@ import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Music, User } f
 import VideoPlayer from "@/app/components/video/page";
 import { useToast } from "@/app/hooks/use-toast";
 
+type Comment = {
+  user?: {
+    _id?: string;
+    name?: string;
+  };
+  text: string;
+};
+
 type Reel = {
   _id: string;
   videoUrl: string;
@@ -17,7 +25,7 @@ type Reel = {
   date?: string;
   audio?: string;
   likes?: number;
-  comments?: number;
+  comments?: Comment[];
   shares?: number;
   user?: {
     _id?: string;
@@ -137,7 +145,7 @@ export default function FeedPage() {
                   videoUrl: video.videoUrl,
                   thumbnailUrl: video.thumbnailUrl,
                   likes: video.likes ?? 0,
-                  comments: video.comments ?? 0,
+                  comments: Array.isArray(video.comments) ? video.comments.length : 0,
                   shares: video.shares ?? 0,
                 }}
                 isActive={currentVideoIndex === index}
@@ -170,10 +178,21 @@ export default function FeedPage() {
                     </Button>
                   </div>
                   <p className="text-white mb-3">{video.caption}</p>
-                  <div className="flex items-center text-white/80">
+                  <div className="flex items-center text-white/80 mb-2">
                     <Music className="h-4 w-4 mr-2" />
                     <p className="text-sm">{video.audio || "Original Audio"}</p>
                   </div>
+                  {/* Comments Section */}
+                  {video.comments && Array.isArray(video.comments) && video.comments.length > 0 && (
+                    <div className="bg-black/40 rounded p-2 max-h-32 overflow-y-auto mb-2">
+                      {video.comments.map((comment, idx) => (
+                        <div key={idx} className="text-white text-sm mb-1">
+                          <span className="font-semibold">{comment.user?.name || "User"}: </span>
+                          {comment.text}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -204,7 +223,9 @@ export default function FeedPage() {
                   >
                     <MessageCircle className="h-6 w-6" />
                   </Button>
-                  <span className="text-xs mt-1 text-white font-medium">{video.comments ?? 0}</span>
+                  <span className="text-xs mt-1 text-white font-medium">
+                    {Array.isArray(video.comments) ? video.comments.length : 0}
+                  </span>
                 </div>
                 <div className="flex flex-col items-center">
                   <Button
