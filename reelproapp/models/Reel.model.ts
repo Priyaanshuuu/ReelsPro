@@ -27,6 +27,32 @@ const ReelSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    likes: [
+      {
+        types: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    comments:[
+      {
+        user:{
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        text:{
+          type:String,
+          required: true,
+        },
+        date:{
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+    shares:{
+      type: Number,
+      default:0,
+    }
   },
   { timestamps: true }
 );
