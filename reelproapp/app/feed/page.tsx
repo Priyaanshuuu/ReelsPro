@@ -75,17 +75,24 @@ export default function FeedPage() {
   }, [reels]);
 
   // Toggle like
-  const toggleLike = (id: string) => {
-    setLikedVideos((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+  const toggleLike = async(id:string)=>{
+    const res = await fetch("/api/reels/likes",{
+      method: "POST",
+      headers:{
+        "Content-Type": "application/json", 
+      },
+      body: JSON.stringify({ reelId: id }),
+    });
+    const data = await res.json();
+    setReels((prev) =>
+      prev.map((reel) =>
+        reel._id === id ? { ...reel, likes: data.likes } : reel
+      )
     );
-    if (!likedVideos.includes(id)) {
-      toast({
-        description: "Video added to your likes",
-        duration: 1500,
-      });
-    }
-  };
+    setLikedVideos((prev)=>
+     prev.includes(id) ? prev.filter((i)=>i !==id):[...prev,id])
+  }
+ 
 
   // Toggle save
   const toggleSave = (id: string) => {
@@ -203,7 +210,10 @@ export default function FeedPage() {
                     variant="ghost"
                     size="icon"
                     className="rounded-full bg-black/20 backdrop-blur-sm text-white hover:bg-white/20 hover:text-white h-12 w-12"
-                    onClick={() => toggleLike(video._id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleLike(video._id)}
+                    }
                   >
                     <Heart className={`h-6 w-6 ${likedVideos.includes(video._id) ? "fill-red-500 text-red-500" : ""}`} />
                   </Button>

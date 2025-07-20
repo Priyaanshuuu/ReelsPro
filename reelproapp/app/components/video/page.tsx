@@ -74,8 +74,7 @@ export default function VideoPlayer({ video, isActive }: VideoPlayerProps) {
   };
 
   return (
-    <div className="relative w-full h-full overflow-hidden bg-black">
-      {/* Video element */}
+    <div className="relative w-full h-full">
       <video
         ref={videoRef}
         src={video.videoUrl}
@@ -85,17 +84,12 @@ export default function VideoPlayer({ video, isActive }: VideoPlayerProps) {
         muted={isMuted}
         onTimeUpdate={handleTimeUpdate}
         poster={video.thumbnailUrl}
-      />
-
-      {/* Click overlay */}
-      <div
-        className="absolute inset-0 z-10 cursor-pointer"
-        onClick={togglePlayPause}
+        onClick={togglePlayPause} // Only video toggles play/pause!
       />
 
       {/* Play icon */}
       {!isPlaying && (
-        <div className="absolute inset-0 flex items-center justify-center z-20">
+        <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
           <div className="h-16 w-16 bg-black/40 rounded-full flex items-center justify-center backdrop-blur-sm">
             <Play className="h-8 w-8 text-white" />
           </div>
@@ -106,6 +100,7 @@ export default function VideoPlayer({ video, isActive }: VideoPlayerProps) {
       <button
         className="absolute top-4 right-4 z-20 p-2 bg-black/30 rounded-full backdrop-blur-sm"
         onClick={toggleMute}
+        type="button"
       >
         {isMuted ? (
           <VolumeX className="h-5 w-5 text-white" />
