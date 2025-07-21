@@ -39,6 +39,7 @@ export default function FeedPage() {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [likedVideos, setLikedVideos] = useState<string[]>([]);
   const [savedVideos, setSavedVideos] = useState<string[]>([]);
+  const [commentTexts, setCommentTexts] = useState<{ [key: string]: string }>({});
   const videoRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Fetch all reels from API
@@ -75,11 +76,11 @@ export default function FeedPage() {
   }, [reels]);
 
   // Toggle like
-  const toggleLike = async(id:string)=>{
-    const res = await fetch("/api/reels/likes",{
+  const toggleLike = async (id: string) => {
+    const res = await fetch("/api/reels/likes", {
       method: "POST",
-      headers:{
-        "Content-Type": "application/json", 
+      headers: {
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ reelId: id }),
     });
@@ -89,10 +90,10 @@ export default function FeedPage() {
         reel._id === id ? { ...reel, likes: data.likes } : reel
       )
     );
-    setLikedVideos((prev)=>
-     prev.includes(id) ? prev.filter((i)=>i !==id):[...prev,id])
-  }
- 
+    setLikedVideos((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
 
   // Toggle save
   const toggleSave = (id: string) => {
@@ -113,6 +114,34 @@ export default function FeedPage() {
       description: "Sharing options opened",
       duration: 1500,
     });
+  };
+
+  // Handle comment submit
+  const handleCommentSubmit = async (e: React.FormEvent, reelId: string) => {
+    e.preventDefault();
+    const text = commentTexts[reelId]?.trim();
+    if (!text) return;
+    const res = await fetch("/api/reels/comment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reelId, text }),
+    });
+    const data = await res.json();
+    if (data.comments) {
+      setReels((prev) =>
+        prev.map((reel) =>
+          reel._id === reelId ? { ...reel, comments: data.comments } : reel
+        )
+      );
+      setCommentTexts((prev) => ({ ...prev, [reelId]: "" }));
+    } else if (data.error) {
+      toast({ description: data.error, duration: 2000 });
+    }
+  };
+
+  // Handle comment input change
+  const handleCommentChange = (reelId: string, value: string) => {
+    setCommentTexts((prev) => ({ ...prev, [reelId]: value }));
   };
 
   if (reels.length === 0) {
@@ -200,6 +229,25 @@ export default function FeedPage() {
                       ))}
                     </div>
                   )}
+                  {/* Add comment input */}
+                  <form
+                    onSubmit={e => handleCommentSubmit(e, video._id)}
+                    className="flex gap-2 mt-2"
+                  >
+                    <input
+                      type="text"
+                      value={commentTexts[video._id] || ""}
+                      onChange={e => handleCommentChange(video._id, e.target.value)}
+                      placeholder="Add a comment..."
+                      className="flex-1 rounded px-2 py-1 text-black"
+                    />
+                    <button
+                      type="submit"
+                      className="bg-blue-500 text-white px-3 py-1 rounded"
+                    >
+                      Post
+                    </button>
+                  </form>
                 </div>
               </div>
 
@@ -212,8 +260,8 @@ export default function FeedPage() {
                     className="rounded-full bg-black/20 backdrop-blur-sm text-white hover:bg-white/20 hover:text-white h-12 w-12"
                     onClick={(e) => {
                       e.stopPropagation();
-                      toggleLike(video._id)}
-                    }
+                      toggleLike(video._id)
+                    }}
                   >
                     <Heart className={`h-6 w-6 ${likedVideos.includes(video._id) ? "fill-red-500 text-red-500" : ""}`} />
                   </Button>
