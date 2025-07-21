@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Button } from "@/app/components/ui/button";
 import Navigation from "@/app/components/navigation";
-import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Music, User } from "lucide-react";
+import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Music, User, X } from "lucide-react";
 import VideoPlayer from "@/app/components/video/page";
 import { useToast } from "@/app/hooks/use-toast";
 
@@ -42,6 +42,7 @@ export default function FeedPage() {
   const [likedVideos, setLikedVideos] = useState<string[]>([]);
   const [savedVideos, setSavedVideos] = useState<string[]>([]);
   const [commentTexts, setCommentTexts] = useState<{ [key: string]: string }>({});
+  const [openCommentsFor, setOpenCommentsFor] = useState<string | null>(null);
   const videoRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Fetch all reels from API
@@ -224,49 +225,6 @@ export default function FeedPage() {
                     <Music className="h-4 w-4 mr-2" />
                     <p className="text-sm">{video.audio || "Original Audio"}</p>
                   </div>
-                  {/* Comments Section - Instagram style */}
-                  <div className="bg-black/60 rounded-lg p-2 max-h-48 overflow-y-auto mb-2">
-                    {video.comments && Array.isArray(video.comments) && video.comments.length > 0 ? (
-                      video.comments.map((comment, idx) => (
-                        <div key={idx} className="flex items-start gap-2 mb-2">
-                          <div className="w-8 h-8 rounded-full bg-primary/30 flex items-center justify-center overflow-hidden">
-                            {comment.user?.image ? (
-                              <img src={comment.user.image} alt={comment.user.name || "User"} className="w-8 h-8 object-cover rounded-full" />
-                            ) : (
-                              <User className="h-4 w-4 text-primary-foreground" />
-                            )}
-                          </div>
-                          <div>
-                            <span className="font-semibold text-white text-sm">
-                              {comment.user?.name || "User"}
-                            </span>
-                            <span className="text-white text-sm ml-2">{comment.text}</span>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-white/60 text-sm">No comments yet. Be the first!</div>
-                    )}
-                  </div>
-                  {/* Add comment input - Instagram style */}
-                  <form
-                    onSubmit={e => handleCommentSubmit(e, video._id)}
-                    className="flex items-center gap-2 mt-2 bg-black/40 rounded-lg px-2 py-1"
-                  >
-                    <input
-                      type="text"
-                      value={commentTexts[video._id] || ""}
-                      onChange={e => handleCommentChange(video._id, e.target.value)}
-                      placeholder="Add a comment..."
-                      className="flex-1 bg-transparent text-white placeholder:text-white/60 outline-none"
-                    />
-                    <button
-                      type="submit"
-                      className="text-blue-400 font-semibold hover:text-blue-600"
-                    >
-                      Post
-                    </button>
-                  </form>
                 </div>
               </div>
 
@@ -291,12 +249,7 @@ export default function FeedPage() {
                     variant="ghost"
                     size="icon"
                     className="rounded-full bg-black/20 backdrop-blur-sm text-white hover:bg-white/20 hover:text-white h-12 w-12"
-                    onClick={() => {
-                      toast({
-                        description: "Comments opened",
-                        duration: 1500,
-                      });
-                    }}
+                    onClick={() => setOpenCommentsFor(video._id)}
                   >
                     <MessageCircle className="h-6 w-6" />
                   </Button>
@@ -339,6 +292,62 @@ export default function FeedPage() {
           </div>
         ))}
       </div>
+
+      {/* Comment Modal */}
+      {openCommentsFor && (
+        <div className="fixed inset-0 z-50 bg-black/70 flex items-end sm:items-center justify-center">
+          <div className="bg-[#18181b] w-full sm:w-[400px] max-h-[70vh] rounded-t-2xl sm:rounded-2xl p-4 flex flex-col">
+            <button
+              className="self-end text-white mb-2"
+              onClick={() => setOpenCommentsFor(null)}
+              aria-label="Close comments"
+            >
+              <X className="h-6 w-6" />
+            </button>
+            <div className="flex-1 overflow-y-auto">
+              {reels.find(r => r._id === openCommentsFor)?.comments?.length ? (
+                reels.find(r => r._id === openCommentsFor)!.comments!.map((comment, idx) => (
+                  <div key={idx} className="flex items-start gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/30 flex items-center justify-center overflow-hidden">
+                      {comment.user?.image ? (
+                        <img src={comment.user.image} alt={comment.user.name || "User"} className="w-8 h-8 object-cover rounded-full" />
+                      ) : (
+                        <User className="h-4 w-4 text-primary-foreground" />
+                      )}
+                    </div>
+                    <div>
+                      <span className="font-semibold text-white text-sm">
+                        {comment.user?.name || "User"}
+                      </span>
+                      <span className="text-white text-sm ml-2">{comment.text}</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-white/60 text-sm">No comments yet. Be the first!</div>
+              )}
+            </div>
+            <form
+              onSubmit={e => handleCommentSubmit(e, openCommentsFor)}
+              className="flex items-center gap-2 mt-2 bg-black/40 rounded-lg px-2 py-1"
+            >
+              <input
+                type="text"
+                value={commentTexts[openCommentsFor] || ""}
+                onChange={e => handleCommentChange(openCommentsFor, e.target.value)}
+                placeholder="Add a comment..."
+                className="flex-1 bg-transparent text-white placeholder:text-white/60 outline-none"
+              />
+              <button
+                type="submit"
+                className="text-blue-400 font-semibold hover:text-blue-600"
+              >
+                Post
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }
