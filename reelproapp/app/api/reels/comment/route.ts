@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     await reel.save();
 
     // Optionally, populate user info for the new comment
-    await reel.populate("comments.user", "name");
+    await reel.populate("comments.user", "name image");
 
     return NextResponse.json({ comments: reel.comments });
   } catch (err) {

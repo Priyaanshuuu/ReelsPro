@@ -12,6 +12,7 @@ type Comment = {
   user?: {
     _id?: string;
     name?: string;
+    image?: string;
   };
   text: string;
 };
@@ -30,6 +31,7 @@ type Reel = {
   user?: {
     _id?: string;
     name?: string;
+    image?: string;
   };
 };
 
@@ -195,8 +197,12 @@ export default function FeedPage() {
                       href={`/profile/${video.user?._id || "user"}`}
                       className="flex items-center"
                     >
-                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-border mr-3">
-                        <User className="h-5 w-5 text-primary-foreground" />
+                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-border mr-3 overflow-hidden">
+                        {video.user?.image ? (
+                          <img src={video.user.image} alt={video.user.name || "user"} className="w-10 h-10 object-cover rounded-full" />
+                        ) : (
+                          <User className="h-5 w-5 text-primary-foreground" />
+                        )}
                       </div>
                       <div>
                         <p className="font-medium text-white">
@@ -218,32 +224,45 @@ export default function FeedPage() {
                     <Music className="h-4 w-4 mr-2" />
                     <p className="text-sm">{video.audio || "Original Audio"}</p>
                   </div>
-                  {/* Comments Section */}
-                  {video.comments && Array.isArray(video.comments) && video.comments.length > 0 && (
-                    <div className="bg-black/40 rounded p-2 max-h-32 overflow-y-auto mb-2">
-                      {video.comments.map((comment, idx) => (
-                        <div key={idx} className="text-white text-sm mb-1">
-                          <span className="font-semibold">{comment.user?.name || "User"}: </span>
-                          {comment.text}
+                  {/* Comments Section - Instagram style */}
+                  <div className="bg-black/60 rounded-lg p-2 max-h-48 overflow-y-auto mb-2">
+                    {video.comments && Array.isArray(video.comments) && video.comments.length > 0 ? (
+                      video.comments.map((comment, idx) => (
+                        <div key={idx} className="flex items-start gap-2 mb-2">
+                          <div className="w-8 h-8 rounded-full bg-primary/30 flex items-center justify-center overflow-hidden">
+                            {comment.user?.image ? (
+                              <img src={comment.user.image} alt={comment.user.name || "User"} className="w-8 h-8 object-cover rounded-full" />
+                            ) : (
+                              <User className="h-4 w-4 text-primary-foreground" />
+                            )}
+                          </div>
+                          <div>
+                            <span className="font-semibold text-white text-sm">
+                              {comment.user?.name || "User"}
+                            </span>
+                            <span className="text-white text-sm ml-2">{comment.text}</span>
+                          </div>
                         </div>
-                      ))}
-                    </div>
-                  )}
-                  {/* Add comment input */}
+                      ))
+                    ) : (
+                      <div className="text-white/60 text-sm">No comments yet. Be the first!</div>
+                    )}
+                  </div>
+                  {/* Add comment input - Instagram style */}
                   <form
                     onSubmit={e => handleCommentSubmit(e, video._id)}
-                    className="flex gap-2 mt-2"
+                    className="flex items-center gap-2 mt-2 bg-black/40 rounded-lg px-2 py-1"
                   >
                     <input
                       type="text"
                       value={commentTexts[video._id] || ""}
                       onChange={e => handleCommentChange(video._id, e.target.value)}
                       placeholder="Add a comment..."
-                      className="flex-1 rounded px-2 py-1 text-black"
+                      className="flex-1 bg-transparent text-white placeholder:text-white/60 outline-none"
                     />
                     <button
                       type="submit"
-                      className="bg-blue-500 text-white px-3 py-1 rounded"
+                      className="text-blue-400 font-semibold hover:text-blue-600"
                     >
                       Post
                     </button>
