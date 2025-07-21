@@ -3,6 +3,7 @@ import { dbConnect } from "@/lib/db";
 import Reel from "@/models/Reel.model";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import mongoose from "mongoose";
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,18 +23,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Reel not found" }, { status: 404 });
     }
 
-    const userId = session.user._id || session.user.id;
-    const alreadyLiked = reel.likes.some((id: any) => id.toString() === userId);
+    // Always use MongoDB ObjectId for userId
+    const userId = session.user._id;
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return NextResponse.json({ error: "Invalid userId in session" }, { status: 400 });
+    }
+    const objectId = new mongoose.Types.ObjectId(userId);
+
+    const alreadyLiked = reel.likes.some((id: any) => id.toString() === objectId.toString());
 
     if (alreadyLiked) {
-      reel.likes = reel.likes.filter((id: any) => id.toString() !== userId);
+      reel.likes = reel.likes.filter((id: any) => id.toString() !== objectId.toString());
     } else {
-      reel.likes.push(userId);
+      reel.likes.push(objectId);
     }
 
     await reel.save();
     return NextResponse.json({ likes: reel.likes.length });
   } catch (err) {
+    console.error("LIKE API ERROR:", err);
     return NextResponse.json({ error: "Server error", details: String(err) }, { status: 500 });
   }
 }

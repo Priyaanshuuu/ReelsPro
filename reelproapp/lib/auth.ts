@@ -65,10 +65,16 @@ export const authOptions: NextAuthOptions = {
 
 callbacks: {
   async jwt({token,user}){
-    if(user){
-      token._id = user._id?.toString() || user.id;
+    await dbConnect();
+     if (user) {
+    // For OAuth, find or create the user in your DB and get the MongoDB _id
+    let dbUser = await User.findOne({ email: user.email });
+    if (!dbUser) {
+      dbUser = await User.create({ email: user.email });
     }
-    return token;
+    token._id = dbUser._id.toString();
+  }
+  return token;
   },
   async session({session, token}){
     console.log("Token in session callback", token);
