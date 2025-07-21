@@ -1,12 +1,13 @@
-import mongoose, { Schema, model, models } from "mongoose";
+import mongoose, { Schema, model, models, Document } from "mongoose";
 import bcrypt from "bcryptjs";
 
-export interface IUser {
+export interface IUser extends Document {
   email: string;
-  password?: string; // <-- Optional for Google users
+  password?: string;
   googleId?: string;
   name?: string;
   image?: string;
+  savedReels?: mongoose.Types.ObjectId[];
   _id?: mongoose.Types.ObjectId;
   createdAt?: Date;
   updatedAt?: Date;
@@ -15,10 +16,11 @@ export interface IUser {
 const userSchema = new Schema<IUser>(
   {
     email: { type: String, required: true, unique: true },
-    password: { type: String }, // <-- Not required
-    googleId: { type: String, unique: true, sparse: true }, // <-- Add this
+    password: { type: String }, // Optional for OAuth users
+    googleId: { type: String, unique: true, sparse: true },
     name: { type: String },
     image: { type: String },
+    savedReels: [{ type: mongoose.Schema.Types.ObjectId, ref: "Reel" }],
   },
   { timestamps: true }
 );
