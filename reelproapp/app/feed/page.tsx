@@ -98,15 +98,23 @@ export default function FeedPage() {
     );
   };
 
-  // Toggle save
-  const toggleSave = (id: string) => {
+  // Toggle save (persistent)
+  const toggleSave = async (id: string) => {
+    const res = await fetch("/api/reels/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reelId: id }),
+    });
+    const data = await res.json();
     setSavedVideos((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+      data.saved
+        ? [...prev, id]
+        : prev.filter((i) => i !== id)
     );
     toast({
-      description: savedVideos.includes(id)
-        ? "Video removed from saved"
-        : "Video saved to your collection",
+      description: data.saved
+        ? "Video saved to your collection"
+        : "Video removed from saved",
       duration: 1500,
     });
   };
