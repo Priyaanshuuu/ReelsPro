@@ -20,7 +20,10 @@ const userSchema = new Schema<IUser>(
     googleId: { type: String, unique: true, sparse: true },
     name: { type: String },
     image: { type: String },
-    savedReels: [{ type: mongoose.Schema.Types.ObjectId, ref: "Reel" }],
+    savedReels: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Reel" }],
+      default:[],
+    }
   },
   { timestamps: true }
 );

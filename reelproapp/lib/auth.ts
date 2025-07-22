@@ -10,6 +10,8 @@ import User from "../models/User.model";
 declare module "next-auth" {
   interface User {
     _id?: string;
+    name?: string;
+    image?: string;
   }
 }
 
@@ -40,10 +42,13 @@ export const authOptions: NextAuthOptions = {
             throw new Error("Invalid password");
           }
 
+          // Return all needed fields for session and UI
           return {
-            id: user._id.toString(), // Required by NextAuth User type
-            _id: user._id.toString(), // Custom property for your use
+            id: user._id.toString(),
+            _id: user._id.toString(),
             email: user.email,
+            name: user.name,
+            image: user.image,
           };
         } catch (error) {
           console.error("Auth Error", error);
@@ -63,28 +68,32 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
 
-callbacks: {
-  async jwt({token,user}){
-    await dbConnect();
-     if (user) {
-    // For OAuth, find or create the user in your DB and get the MongoDB _id
-    let dbUser = await User.findOne({ email: user.email });
-    if (!dbUser) {
-      dbUser = await User.create({ email: user.email });
-    }
-    token._id = dbUser._id.toString();
-  }
-  return token;
+  callbacks: {
+    async jwt({ token, user }) {
+      await dbConnect();
+      if (user) {
+        // For OAuth, find or create the user in your DB and get the MongoDB _id
+        let dbUser = await User.findOne({ email: user.email });
+        if (!dbUser) {
+          dbUser = await User.create({
+            email: user.email,
+            name: user.name,
+            image: user.image,
+          });
+        }
+        token._id = dbUser._id.toString();
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      console.log("Token in session callback", token);
+
+      if (session.user && token._id) {
+        session.user._id = token._id;
+      }
+      return session;
+    },
   },
-  async session({session, token}){
-    console.log("Token in session callback", token);
-    
-    if(session.user && token._id){
-      session.user._id = token._id;
-    }
-    return session;
-  },
-},
 
   pages: {
     signIn: "/signup",
