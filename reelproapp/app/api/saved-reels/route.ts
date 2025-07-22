@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/lib/db";
 import User from "@/models/User.model";
-import Reel from "@/models/Reel.model";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
+    if (!session || !session.user?._id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
