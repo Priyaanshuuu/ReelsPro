@@ -100,7 +100,7 @@ export default function FeedPage() {
 
   // Toggle save (persistent)
   const toggleSave = async (id: string) => {
-    const res = await fetch("/api/reels/save", {
+    const res = await fetch("/api/saved-reels", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ reelId: id }),

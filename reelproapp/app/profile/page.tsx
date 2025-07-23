@@ -8,10 +8,10 @@ import { cn } from "@/lib/utils";
 
 interface Reel {
   _id: string;
-  videoUrl: string;
-  thumbnailUrl: string;
-  likes: number;
-  comments: number;
+  videoUrl?: string;
+  thumbnailUrl?: string;
+  likes?: number | string[];
+  comments?: number | any[];
   isPrivate?: boolean;
   user?: { name?: string; image?: string };
   caption?: string;
@@ -23,7 +23,7 @@ export default function ReelGrid() {
   const [reels, setReels] = useState<Reel[]>([]);
   const [savedReels, setSavedReels] = useState<Reel[]>([]);
   const { data: session } = useSession();
-  const userId = session?.user?._id || session?.user?.id; // support both _id and id
+  const userId = session?.user?._id || session?.user?.id;
 
   // Fetch user's own reels
   useEffect(() => {
@@ -33,11 +33,17 @@ export default function ReelGrid() {
       .then((data) => setReels(data));
   }, [userId]);
 
-  // Fetch saved reels
+  // Fetch saved reels with debug log
   useEffect(() => {
     fetch("/api/saved-reels")
       .then(res => res.json())
-      .then(data => setSavedReels(data.savedReels || []));
+      .then(data => {
+        console.log("Saved reels from API:", data.savedReels);
+        setSavedReels(data.savedReels || []);
+      })
+      .catch(err => {
+        console.error("Error fetching saved reels:", err);
+      });
   }, []);
 
   return (
@@ -67,7 +73,7 @@ export default function ReelGrid() {
                 {/* Thumbnail */}
                 <div
                   className="absolute inset-0 bg-cover bg-center transition-all duration-300 scale-100 group-hover:scale-105"
-                  style={{ backgroundImage: `url(${reel.thumbnailUrl})` }}
+                  style={{ backgroundImage: `url(${reel.thumbnailUrl || ""})` }}
                 />
 
                 {/* Overlay */}
@@ -84,11 +90,15 @@ export default function ReelGrid() {
                     <div className="flex items-center gap-4">
                       <div className="flex items-center">
                         <Heart className="h-5 w-5 text-white mr-1" />
-                        <span className="text-sm text-white">{reel.likes ?? 0}</span>
+                        <span className="text-sm text-white">
+                          {Array.isArray(reel.likes) ? reel.likes.length : reel.likes ?? 0}
+                        </span>
                       </div>
                       <div className="flex items-center">
                         <MessageCircle className="h-5 w-5 text-white mr-1" />
-                        <span className="text-sm text-white">{reel.comments ?? 0}</span>
+                        <span className="text-sm text-white">
+                          {Array.isArray(reel.comments) ? reel.comments.length : reel.comments ?? 0}
+                        </span>
                       </div>
                     </div>
                     {reel.isPrivate && (
@@ -107,6 +117,8 @@ export default function ReelGrid() {
         <h2 className="text-3xl font-bold text-white mb-8 mt-16 text-center tracking-tight drop-shadow-lg">
           Saved Reels
         </h2>
+        {/* Debug output */}
+        <pre className="text-white bg-black/50 p-2 rounded mb-4">{JSON.stringify(savedReels, null, 2)}</pre>
         {savedReels.length === 0 ? (
           <div className="flex flex-col items-center justify-center min-h-[20vh] text-center px-4 bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] rounded-lg shadow-inner">
             <Play className="h-12 w-12 text-indigo-500 mb-2" />
@@ -126,7 +138,7 @@ export default function ReelGrid() {
                 {/* Thumbnail */}
                 <div
                   className="absolute inset-0 bg-cover bg-center transition-all duration-300 scale-100 group-hover:scale-105"
-                  style={{ backgroundImage: `url(${reel.thumbnailUrl})` }}
+                  style={{ backgroundImage: `url(${reel.thumbnailUrl || ""})` }}
                 />
                 {/* Overlay */}
                 <div className="absolute inset-0 bg-black/40 flex flex-col justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-200">
