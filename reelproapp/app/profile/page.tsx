@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Play, Heart, MessageCircle, Lock } from "lucide-react";
+import { Play, Heart, MessageCircle, Lock, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Reel {
@@ -21,8 +21,15 @@ export default function ReelGrid() {
   const router = useRouter();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [reels, setReels] = useState<Reel[]>([]);
-  const [savedReels, setSavedReels] = useState<Reel[]>([]);
   const { data: session } = useSession();
+
+  // Best-effort user name extraction
+  const userName =
+    session?.user?.name ||
+    session?.user?.username ||
+    (session?.user?.email ? session.user.email.split("@")[0] : "User");
+  const userImage = session?.user?.image;
+
   const userId = session?.user?._id || session?.user?.id;
 
   // Fetch user's own reels
@@ -33,24 +40,58 @@ export default function ReelGrid() {
       .then((data) => setReels(data));
   }, [userId]);
 
-  // Fetch saved reels with debug log
-  useEffect(() => {
-    fetch("/api/saved-reels")
-      .then(res => res.json())
-      .then(data => {
-        console.log("Saved reels from API:", data.savedReels);
-        setSavedReels(data.savedReels || []);
-      })
-      .catch(err => {
-        console.error("Error fetching saved reels:", err);
-      });
-  }, []);
+  // Profile stats
+  const totalLikes = reels.reduce(
+    (sum, reel) => sum + (Array.isArray(reel.likes) ? reel.likes.length : Number(reel.likes) || 0),
+    0
+  );
+  const totalComments = reels.reduce(
+    (sum, reel) => sum + (Array.isArray(reel.comments) ? reel.comments.length : Number(reel.comments) || 0),
+    0
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] py-10 px-2">
-      <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl font-bold text-white mb-8 text-center tracking-tight drop-shadow-lg">
-          Your Reels
+      <div className="max-w-3xl mx-auto">
+        {/* Profile Header */}
+        <div className="flex flex-col items-center bg-[#181824]/90 rounded-2xl shadow-xl border border-[#23234a] p-8 mb-10">
+          <div className="relative">
+            {userImage ? (
+              <img
+                src={userImage}
+                alt={userName}
+                className="w-28 h-28 rounded-full border-4 border-indigo-500 shadow-lg object-cover"
+              />
+            ) : (
+              <div className="w-28 h-28 rounded-full bg-gradient-to-br from-indigo-500 to-purple-700 flex items-center justify-center border-4 border-indigo-500 shadow-lg">
+                <User className="h-14 w-14 text-white/80" />
+              </div>
+            )}
+          </div>
+          <h1 className="text-3xl font-bold text-white mt-4 mb-1 drop-shadow-lg">
+            {userName}
+          </h1>
+          <p className="text-indigo-300 text-base mb-4">
+            @{userName}
+          </p>
+          <div className="flex gap-8 justify-center mt-2">
+            <div className="flex flex-col items-center">
+              <span className="text-xl font-bold text-white">{reels.length}</span>
+              <span className="text-xs text-gray-400">Reels</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <span className="text-xl font-bold text-white">{totalLikes}</span>
+              <span className="text-xs text-gray-400">Likes</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <span className="text-xl font-bold text-white">{totalComments}</span>
+              <span className="text-xs text-gray-400">Comments</span>
+            </div>
+          </div>
+        </div>
+
+        <h2 className="text-2xl font-bold text-white mb-6 mt-2 text-center tracking-tight drop-shadow-lg">
+          {userName}&apos;s Reels
         </h2>
         {reels.length === 0 ? (
           <div className="flex flex-col items-center justify-center min-h-[40vh] text-center px-4 bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] rounded-lg shadow-inner">
@@ -112,45 +153,6 @@ export default function ReelGrid() {
             ))}
           </div>
         )}
-
-        {/* Saved Reels Section */}
-        <h2 className="text-3xl font-bold text-white mb-8 mt-16 text-center tracking-tight drop-shadow-lg">
-          Saved Reels
-        </h2>
-        {/* Debug output */}
-        <pre className="text-white bg-black/50 p-2 rounded mb-4">{JSON.stringify(savedReels, null, 2)}</pre>
-        {savedReels.length === 0 ? (
-          <div className="flex flex-col items-center justify-center min-h-[20vh] text-center px-4 bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] rounded-lg shadow-inner">
-            <Play className="h-12 w-12 text-indigo-500 mb-2" />
-            <h3 className="text-xl font-semibold text-white mb-1">No Saved Reels</h3>
-            <p className="text-gray-400 max-w-md">
-              Reels you save will appear here.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-            {savedReels.map((reel, index) => (
-              <div
-                key={reel._id}
-                className="relative aspect-[9/16] bg-black/40 rounded-xl overflow-hidden cursor-pointer group transition-all shadow-lg hover:shadow-2xl border border-gray-700"
-                onClick={() => router.push(`/reel/${reel._id}`)}
-              >
-                {/* Thumbnail */}
-                <div
-                  className="absolute inset-0 bg-cover bg-center transition-all duration-300 scale-100 group-hover:scale-105"
-                  style={{ backgroundImage: `url(${reel.thumbnailUrl || ""})` }}
-                />
-                {/* Overlay */}
-                <div className="absolute inset-0 bg-black/40 flex flex-col justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  <div className="p-3">
-                    <div className="text-white text-sm truncate">{reel.caption}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );
-}
