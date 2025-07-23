@@ -4,7 +4,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, PlusSquare, Heart, UserCircle } from "lucide-react";
+import { Home, PlusSquare, Heart, UserCircle, Bookmark } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function Navigation() {
@@ -12,10 +12,6 @@ export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
   const { data: session } = useSession();
   const userId = session?.user?._id;
-  console.log("session", session);
-  console.log("userId", userId);
-  
-  
 
   const isLandingPage = pathname === "/";
 
@@ -33,6 +29,12 @@ export default function Navigation() {
     { name: "Home", href: "/feed", icon: <Home className="w-6 h-6" /> },
     { name: "Upload", href: "/upload", icon: <PlusSquare className="w-6 h-6" /> },
     { name: "Activity", href: "/activity", icon: <Heart className="w-6 h-6" /> },
+    {
+      name: "Saved",
+      href: "/saved",
+      icon: <Bookmark className="w-6 h-6" />,
+      disabled: !userId,
+    },
     {
       name: "Profile",
       href: userId ? `/profile/${userId}` : "#",
