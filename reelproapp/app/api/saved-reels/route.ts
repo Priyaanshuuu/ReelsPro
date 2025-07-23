@@ -31,7 +31,31 @@ export async function POST(request: NextRequest) {
     }
 
     await user.save();
-    return NextResponse.json({ saved: !alreadySaved }); // <-- Always return JSON!
+    return NextResponse.json({ saved: !alreadySaved });
+  } catch (err) {
+    return NextResponse.json({ error: "Server error", details: String(err) }, { status: 500 });
+  }
+}
+
+// Optional: Always return JSON for GET requests too
+export async function GET(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user?._id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    await dbConnect();
+    const user = await User.findById(session.user._id).populate({
+      path: "savedReels",
+      populate: { path: "user", select: "name image" }
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ savedReels: user.savedReels || [] });
   } catch (err) {
     return NextResponse.json({ error: "Server error", details: String(err) }, { status: 500 });
   }
