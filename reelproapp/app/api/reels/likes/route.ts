@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/lib/db";
 import Reel from "@/models/Reel.model";
-import Notification from "@/models/Notification.model";
+import Notification from "@/models/Notifications.model";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import mongoose from "mongoose";
@@ -53,4 +53,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ likes: reel.likes.length });
   } catch (err) {
     console.error("LIKE API ERROR:", err);
-    return NextResponse.json({ error: "Server error", details: String(err) }, { status: 500 });
+        return NextResponse.json({ error: "Server error", details: String(err) }, { status: 500 });
+      }
+    }

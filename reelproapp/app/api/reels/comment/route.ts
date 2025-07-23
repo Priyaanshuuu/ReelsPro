@@ -3,6 +3,7 @@ import { dbConnect } from "@/lib/db";
 import Reel from "@/models/Reel.model";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import Notification from "@/models/Notifications.model"; // <-- plural
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,6 +33,17 @@ export async function POST(request: NextRequest) {
       text,
       date: new Date(),
     });
+
+    // Create notification for the reel creator (if not self)
+    if (reel.user.toString() !== userId.toString()) {
+      await Notification.create({
+        user: reel.user, // recipient (reel creator)
+        type: "comment",
+        reel: reel._id,
+        from: userId, // who commented
+        comment: text, // the comment text
+      });
+    }
 
     await reel.save();
 
