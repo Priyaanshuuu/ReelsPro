@@ -55,9 +55,9 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0f0f0f] px-4">
-      <div className="w-full max-w-md bg-[#1a1a1a] p-6 rounded-2xl shadow-lg">
+      <div className="w-full max-w-md bg-[#181824] p-8 rounded-2xl shadow-2xl border border-[#23234a]">
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold tracking-tight text-white">Welcome Back </h1>
+          <h1 className="text-3xl font-bold tracking-tight text-white">Welcome Back</h1>
           <p className="text-sm text-gray-400 mt-1">Login to your ReelsPro account</p>
         </div>
 
@@ -92,7 +92,7 @@ export default function LoginPage() {
             <Separator className="bg-gray-600" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-[#1a1a1a] px-2 text-gray-400">or login with email</span>
+            <span className="bg-[#181824] px-2 text-gray-400">or login with email</span>
           </div>
         </div>
 
@@ -106,7 +106,7 @@ export default function LoginPage() {
               placeholder="name@example.com"
               required
               disabled={isLoading}
-              className="bg-[#272727] text-white border border-gray-600"
+              className="bg-[#23234a] text-white border border-gray-600"
             />
           </div>
 
@@ -124,18 +124,18 @@ export default function LoginPage() {
               placeholder="••••••••"
               required
               disabled={isLoading}
-              className="bg-[#272727] text-white border border-gray-600"
+              className="bg-[#23234a] text-white border border-gray-600"
             />
           </div>
 
-          <Button type="submit" className="w-full h-11 bg-primary hover:bg-primary/90" disabled={isLoading}>
+          <Button type="submit" className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg mt-2" disabled={isLoading}>
             {isLoading ? "Logging in..." : "Log in"}
           </Button>
         </form>
 
         <p className="mt-6 text-center text-sm text-gray-400">
           Don’t have an account?{" "}
-          <Link href="/signup" className="text-primary hover:underline">
+          <Link href="/signup" className="text-indigo-400 hover:underline">
             Sign up
           </Link>
         </p>
