@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import FileUpload from "../components/file-upload/index";
+import FileUpload from "../components/file-upload";
 import Navigation from "../components/navigation";
 import { Film, X, Loader } from "lucide-react";
 import { Label } from "../components/ui/label";
@@ -17,13 +17,15 @@ interface UploadResponse {
   [key: string]: unknown;
 }
 
-// Define ImageKit callback types
-
+interface ImageKitError {
+  message?: string;
+  [key: string]: unknown;
+}
 
 interface ImageKitResult {
   url: string;
-  fileId: string;
-  name: string;
+  fileId?: string;
+  name?: string;
   [key: string]: unknown;
 }
 
@@ -137,7 +139,8 @@ export default function Upload() {
         urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!,
       });
 
-      ik.upload(
+      // Use type assertion on the entire expression to bypass strict typing
+      (ik as { upload: (options: unknown, callback: (err: unknown, result: unknown) => void) => void }).upload(
         {
           file,
           fileName: file.name,
@@ -146,24 +149,28 @@ export default function Upload() {
           token: auth.token,
           expire: auth.expire,
         },
-        (err: Error | null, result: ImageKitResult | null) => {
+        (err: unknown, result: unknown) => {
           setThumbnailUploading(false);
-          console.log("Upload callback - err:", err);
-          console.log("Upload callback - result:", result);
-
-          if (err || !result) {
-            const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+          
+          if (err) {
+            console.error("Upload error:", err);
+            const error = err as ImageKitError;
+            const errorMessage = error?.message || "Unknown error occurred";
             setError(`Thumbnail upload failed: ${errorMessage}`);
+          } else if (result && typeof result === 'object' && result !== null && 'url' in result) {
+            console.log("Upload result:", result);
+            const uploadResult = result as ImageKitResult;
+            setThumbnailUrl(uploadResult.url);
           } else {
-            setThumbnailUrl(result.url);
+            setError("Invalid upload response");
           }
         }
       );
+
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error";
       setError(`Failed to authenticate: ${errorMessage}`);
       setThumbnailUploading(false);
-      console.error("Auth error:", err);
     }
   };
 
