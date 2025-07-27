@@ -8,7 +8,7 @@ export interface IUser extends Document {
   name?: string;
   image?: string;
   savedReels?: mongoose.Types.ObjectId[];
-  _id?: mongoose.Types.ObjectId;
+  _id: mongoose.Types.ObjectId; // Required, not optional
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -22,7 +22,7 @@ const userSchema = new Schema<IUser>(
     image: { type: String },
     savedReels: {
       type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Reel" }],
-      default:[],
+      default: [],
     }
   },
   { timestamps: true }
