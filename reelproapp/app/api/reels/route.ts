@@ -62,6 +62,7 @@ export async function GET(request: NextRequest) {
     return Response.json(reelsWithLikeCount);
   } catch (err) {
     console.error("API ERROR:", err);
-    return Response.json({ error: err.message }, { status: 500 });
+    const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+    return Response.json({ error: errorMessage }, { status: 500 });
   }
 }

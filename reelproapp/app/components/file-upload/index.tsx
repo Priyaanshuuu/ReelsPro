@@ -12,7 +12,7 @@ export default function FileUpload({ onSuccess, onProgress }: FileUploadProps) {
   const publicKey = process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY!;
   const urlEndpoint = process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!;
 
-  // Yeh naya authenticator function hai jo /api/imagekit-auth se signature fetch karega
+  // Authenticator function to fetch signature from /api/imagekit-auth
   const authenticator = useCallback(async () => {
     const response = await fetch("/api/imagekit-auth");
     if (!response.ok) {
@@ -29,7 +29,7 @@ export default function FileUpload({ onSuccess, onProgress }: FileUploadProps) {
       authenticator={authenticator}
     >
       <IKUpload
-      accept="video/*"
+        accept="video/*"
         fileName="video-upload.mp4"
         useUniqueFileName={true}
         folder="/videos"
@@ -39,7 +39,7 @@ export default function FileUpload({ onSuccess, onProgress }: FileUploadProps) {
           const percent = Math.round((progress.loaded / progress.total) * 100);
           onProgress(percent);
         }}
-        className="your-optional-classes"
+        className="w-full p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors cursor-pointer text-center"
       />
     </IKContext>
   );

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/app/components/ui/button";
 import Navigation from "@/app/components/navigation";
 import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Music, User, X } from "lucide-react";
-import VideoPlayer from "@/app/components/video/page";
+import VideoPlayer from "@/app/components/video";
 import { useToast } from "@/app/hooks/use-toast";
 import Image from "next/image";
 
