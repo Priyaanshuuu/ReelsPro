@@ -5,13 +5,22 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Play, Heart, MessageCircle, Lock, User } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
+
+// Define proper types
+interface Comment {
+  _id: string;
+  text: string;
+  user: string;
+  createdAt: Date;
+}
 
 interface Reel {
   _id: string;
   videoUrl?: string;
   thumbnailUrl?: string;
   likes?: number | string[];
-  comments?: number | any[];
+  comments?: number | Comment[];
   isPrivate?: boolean;
   user?: { name?: string; image?: string };
   caption?: string;
@@ -35,9 +44,18 @@ export default function ReelGrid() {
   // Fetch user's own reels
   useEffect(() => {
     if (!userId) return;
-    fetch(`/api/reels?userId=${userId}`)
-      .then((res) => res.json())
-      .then((data) => setReels(data));
+    
+    const fetchReels = async () => {
+      try {
+        const response = await fetch(`/api/reels?userId=${userId}`);
+        const data = await response.json();
+        setReels(data);
+      } catch (error) {
+        console.error("Failed to fetch reels:", error);
+      }
+    };
+
+    fetchReels();
   }, [userId]);
 
   // Profile stats
@@ -57,11 +75,15 @@ export default function ReelGrid() {
         <div className="flex flex-col items-center bg-[#181824]/90 rounded-2xl shadow-xl border border-[#23234a] p-8 mb-10">
           <div className="relative">
             {userImage ? (
-              <img
-                src={userImage}
-                alt={userName}
-                className="w-28 h-28 rounded-full border-4 border-indigo-500 shadow-lg object-cover"
-              />
+              <div className="relative w-28 h-28 rounded-full border-4 border-indigo-500 shadow-lg overflow-hidden">
+                <Image
+                  src={userImage}
+                  alt={`${userName} profile picture`}
+                  fill
+                  className="object-cover"
+                  sizes="112px"
+                />
+              </div>
             ) : (
               <div className="w-28 h-28 rounded-full bg-gradient-to-br from-indigo-500 to-purple-700 flex items-center justify-center border-4 border-indigo-500 shadow-lg">
                 <User className="h-14 w-14 text-white/80" />
@@ -112,10 +134,21 @@ export default function ReelGrid() {
                 onClick={() => router.push(`/reel/${reel._id}`)}
               >
                 {/* Thumbnail */}
-                <div
-                  className="absolute inset-0 bg-cover bg-center transition-all duration-300 scale-100 group-hover:scale-105"
-                  style={{ backgroundImage: `url(${reel.thumbnailUrl || ""})` }}
-                />
+                {reel.thumbnailUrl ? (
+                  <div className="relative w-full h-full">
+                    <Image
+                      src={reel.thumbnailUrl}
+                      alt={`Reel by ${userName}`}
+                      fill
+                      className="object-cover transition-all duration-300 scale-100 group-hover:scale-105"
+                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+                    />
+                  </div>
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center">
+                    <Play className="h-12 w-12 text-white/50" />
+                  </div>
+                )}
 
                 {/* Overlay */}
                 <div
