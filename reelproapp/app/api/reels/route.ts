@@ -1,68 +1,74 @@
+// app/api/reels/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/lib/db";
 import Reel from "@/models/Reel.model";
-import mongoose from "mongoose";
 
-export async function POST(request:NextRequest) {
+export async function POST(request: NextRequest) {
     try {
-        const {videoUrl, thumbnailUrl,caption,tags,userId,} = await request.json();
+        const { videoUrl, thumbnailUrl, caption, tags, userId } = await request.json();
+        
+        if (!videoUrl || !caption || !userId) {
+            return NextResponse.json(
+                { error: "Video URL, caption, and user ID are required" },
+                { status: 400 }
+            );
+        }
+
         await dbConnect();
+        
         const reel = await Reel.create({
+            user: userId, // ✅ Model mein 'user' field hai, 'userId' nahi
             videoUrl,
             thumbnailUrl,
             caption,
-            tags,
-            user: userId
+            tags: tags || [],
+            // likes, comments, shares arrays hain model mein, numbers nahi
         });
-         return NextResponse.json(
-            reel,
-            {
-                status:201
-            })
-    } catch (error) {
-        return NextResponse.json({
-            error: "Failed to save reel",
-            console: console.log(error)
-        },
 
-   { status: 500 });
+        return NextResponse.json({
+            success: true,
+            message: "Reel created successfully",
+            reel
+        }, { status: 201 });
+        
+    } catch (error) {
+        console.error("POST Error:", error);
+        return NextResponse.json({
+            error: "Failed to save reel"
+        }, { status: 500 });
     }
-    
 }
 
 export async function GET(request: NextRequest) {
-  try {
-    await dbConnect();
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("userId");
-    let reels;
-    if (userId) {
-  let userQuery;
-  if (mongoose.Types.ObjectId.isValid(userId)) {
-    userQuery = userId;
-  } else {
-    // Google/GitHub waale users ke liye string id bhi allow karo
-    userQuery = userId;
-  }
-  reels = await Reel.find({ user: userQuery })
-  .populate("user", "name _id id")
-  .populate("comments.user", "name _id id")
-  .sort({ createdAt: -1 });
-}else {
-      reels = await Reel.find({})
-      .populate("user", "name _id id")
-      .populate("comments.user", "name _id id")
-      .sort({ createdAt: -1 });
-    }
+    try {
+        await dbConnect();
+        
+        const { searchParams } = new URL(request.url);
+        const userId = searchParams.get("userId");
+        
+        let reels;
+        if (userId) {
+            // Model mein 'user' field hai
+            reels = await Reel.find({ user: userId })
+                .populate('user', 'name email image')
+                .sort({ createdAt: -1 });
+        } else {
+            reels = await Reel.find({})
+                .populate('user', 'name email image')
+                .sort({ createdAt: -1 });
+        }
 
-    const reelsWithLikeCount = reels.map(reel =>({
-      ...reel.toObject(),
-      likes: Array.isArray(reel.likes)?reel.likes.length: reel.likes,
-    }))
-    return Response.json(reelsWithLikeCount);
-  } catch (err) {
-    console.error("API ERROR:", err);
-    const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
-    return Response.json({ error: errorMessage }, { status: 500 });
-  }
+        console.log("Fetched reels count:", reels.length);
+
+        return NextResponse.json({
+            success: true,
+            reels: reels || []
+        });
+        
+    } catch (error) {
+        console.error("GET Error:", error);
+        return NextResponse.json({
+            error: "Failed to fetch reels"
+        }, { status: 500 });
+    }
 }

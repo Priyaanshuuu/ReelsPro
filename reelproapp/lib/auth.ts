@@ -6,12 +6,27 @@ import bcrypt from "bcryptjs";
 import { dbConnect } from "./db";
 import User from "../models/User.model";
 
-// Extend the User type to include _id
+// Extend NextAuth types
 declare module "next-auth" {
   interface User {
     _id?: string;
     name?: string;
     image?: string;
+  }
+  
+  interface Session {
+    user: {
+      _id?: string;
+      email?: string | null;
+      name?: string | null;
+      image?: string | null;
+    };
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    _id?: string;
   }
 }
 
@@ -25,24 +40,35 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("Missing email or password");
+          throw new Error("Email and password are required");
         }
 
         try {
           await dbConnect();
-          const user = await User.findOne({ email: credentials.email });
+          
+          // Email ko lowercase mein search karein (model mein lowercase: true hai)
+          const user = await User.findOne({ 
+            email: credentials.email.toLowerCase().trim() 
+          });
+
+          console.log("Searching for user:", credentials.email.toLowerCase().trim());
+          console.log("User found:", !!user);
 
           if (!user) {
-            throw new Error("No user found with this email");
+            throw new Error("No user found with this email. Please register first.");
+          }
+
+          if (!user.password) {
+            throw new Error("Please use social login or reset your password");
           }
 
           const isValid = await bcrypt.compare(credentials.password, user.password);
+          console.log("Password valid:", isValid);
 
           if (!isValid) {
-            throw new Error("Invalid password");
+            throw new Error("Invalid email or password");
           }
 
-          // Return all needed fields for session and UI
           return {
             id: user._id.toString(),
             _id: user._id.toString(),
@@ -51,45 +77,79 @@ export const authOptions: NextAuthOptions = {
             image: user.image,
           };
         } catch (error) {
-          console.error("Auth Error", error);
+          console.error("Auth Error:", error);
           throw error;
         }
       },
     }),
 
     GitHubProvider({
-      clientId: process.env.GITHUB_ID as string,
-      clientSecret: process.env.GITHUB_SECRET as string,
+      clientId: process.env.GITHUB_ID!,
+      clientSecret: process.env.GITHUB_SECRET!,
     }),
 
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
 
   callbacks: {
+    async signIn({ user, account}) {
+      // OAuth providers ke liye user create/find karein
+      if (account?.provider === "google" || account?.provider === "github") {
+        try {
+          await dbConnect();
+          
+          const existingUser = await User.findOne({ 
+            email: user.email?.toLowerCase().trim() 
+          });
+          
+          if (!existingUser) {
+            await User.create({
+              email: user.email?.toLowerCase().trim(),
+              name: user.name,
+              image: user.image,
+              googleId: account.provider === "google" ? account.providerAccountId : undefined,
+            });
+          }
+          
+          return true;
+        } catch (error) {
+          console.error("SignIn callback error:", error);
+          return false;
+        }
+      }
+      return true;
+    },
+
     async jwt({ token, user }) {
-      await dbConnect();
+      // User login karte time _id ko token mein store karein
       if (user) {
-        // For OAuth, find or create the user in your DB and get the MongoDB _id
-        let dbUser = await User.findOne({ email: user.email });
+        await dbConnect();
+        
+        let dbUser = await User.findOne({ 
+          email: user.email?.toLowerCase().trim() 
+        });
+        
         if (!dbUser) {
+          // OAuth users ke liye fallback
           dbUser = await User.create({
-            email: user.email,
+            email: user.email?.toLowerCase().trim(),
             name: user.name,
             image: user.image,
           });
         }
+        
         token._id = dbUser._id.toString();
       }
       return token;
     },
-    async session({ session, token }) {
-      console.log("Token in session callback", token);
 
+    async session({ session, token }) {
+      // Session mein _id add karein
       if (session.user && token._id) {
-        session.user._id = token._id;
+        session.user._id = token._id as string;
       }
       return session;
     },
