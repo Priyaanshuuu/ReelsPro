@@ -4,7 +4,7 @@ import Reel from "@/models/Reel.model";
 
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();

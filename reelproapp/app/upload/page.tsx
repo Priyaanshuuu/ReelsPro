@@ -3,21 +3,29 @@
 import { useState } from "react";
 import FileUpload from "../components/file-upload/page";
 import Navigation from "../components/navigation";
-import { Film, Image, X, Loader } from "lucide-react";
+import { Film, X, Loader } from "lucide-react";
 import { Label } from "../components/ui/label";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import ImageKit from "imagekit-javascript";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 
 interface UploadResponse {
   url: string;
   [key: string]: unknown;
 }
 
+// Define ImageKit callback types
 
 
+interface ImageKitResult {
+  url: string;
+  fileId: string;
+  name: string;
+  [key: string]: unknown;
+}
 
 export default function Upload() {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
@@ -56,26 +64,27 @@ export default function Upload() {
 
   const handleRemoveVideo = () => {
     setVideoUrl(null);
-    setVideoUrl(null);
     setUploadProgress(0);
     setUploading(false);
     setError(null);
   };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if(!videoUrl||!thumbnailUrl){
+    if (!videoUrl || !thumbnailUrl) {
       setError("Please upload both video and thumbnail before submitting.");
       return;
     }
 
-    if(!userId){
-      setError("User not logged In");
+    if (!userId) {
+      setError("User not logged in");
       return;
     }
+
     try {
       const res = await fetch("/api/reels", {
         method: "POST",
-        headers:{
+        headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
@@ -85,12 +94,19 @@ export default function Upload() {
           tags: tags.split(",").map(tag => tag.trim()),
           userId
         })
-      })
-      if(res.ok){
+      });
+
+      if (res.ok) {
         alert("Video uploaded successfully!");
-      }else{
+        // Reset form
+        setVideoUrl(null);
+        setThumbnailUrl(null);
+        setCaption("");
+        setTags("");
+        setUploadProgress(0);
+      } else {
         const data = await res.json();
-        setError(data.error||"Failed to pot reel");
+        setError(data.error || "Failed to post reel");
       }
     } catch (error) {
       setError("An error occurred while uploading the video.");
@@ -99,60 +115,57 @@ export default function Upload() {
   };
 
   const handleThumbnailFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
-  if (!file) {
-    setError("No file selected.");
-    return;
-  }
-
-  setThumbnailUploading(true);
-  setError(null);
-
-  try {
-    const authRes = await fetch("/api/imagekit-auth");
-    const auth = await authRes.json();
-
-    if (!auth.signature || !auth.token || !auth.expire) {
-      throw new Error("Invalid authentication parameters.");
+    const file = e.target.files?.[0];
+    if (!file) {
+      setError("No file selected.");
+      return;
     }
 
-    const ik = new ImageKit({
-      publicKey: process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY!,
-      urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!,
-    });
+    setThumbnailUploading(true);
+    setError(null);
 
-    ik.upload(
-      {
-        file,
-        fileName: file.name,
-        tags: ["reelspro-thumbnail"],
-        signature: auth.signature,
-        token: auth.token,
-        expire: auth.expire,
-      },
-      (err, result) => {
-        setThumbnailUploading(false);
-        console.log("Upload callback - err:", err);
-        console.log("Upload callback - result:", result);
+    try {
+      const authRes = await fetch("/api/imagekit-auth");
+      const auth = await authRes.json();
 
-        if ((err && Object.keys(err).length > 0) || !result) {
-          setError(`Thumbnail upload failed: ${err?.message ?? "Unknown error"}`);
-        } else {
-          setThumbnailUrl(result.url);
-        }
+      if (!auth.signature || !auth.token || !auth.expire) {
+        throw new Error("Invalid authentication parameters.");
       }
-    );
-  } catch (err: unknown) {
-    let errorMessage = "Unknown error";
-    if (err && typeof err === "object" && "message" in err && typeof (err as { message?: string }).message === "string") {
-      errorMessage = (err as { message: string }).message;
-    }
-    setError(`Failed to authenticate: ${errorMessage}`);
-    setThumbnailUploading(false);
-    console.error("Auth error:", err);
-  }
-};
 
+      const ik = new ImageKit({
+        publicKey: process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY!,
+        urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!,
+      });
+
+      ik.upload(
+        {
+          file,
+          fileName: file.name,
+          tags: ["reelspro-thumbnail"],
+          signature: auth.signature,
+          token: auth.token,
+          expire: auth.expire,
+        },
+        (err: Error | null, result: ImageKitResult | null) => {
+          setThumbnailUploading(false);
+          console.log("Upload callback - err:", err);
+          console.log("Upload callback - result:", result);
+
+          if (err || !result) {
+            const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+            setError(`Thumbnail upload failed: ${errorMessage}`);
+          } else {
+            setThumbnailUrl(result.url);
+          }
+        }
+      );
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      setError(`Failed to authenticate: ${errorMessage}`);
+      setThumbnailUploading(false);
+      console.error("Auth error:", err);
+    }
+  };
 
   return (
     <>
@@ -169,7 +182,7 @@ export default function Upload() {
                 <div className="h-96 border-2 border-dashed border-gray-500 rounded-xl bg-black/30 backdrop-blur-md p-6 flex flex-col items-center justify-center hover:bg-black/40 transition-transform transform hover:scale-105">
                   <Film className="w-12 h-12 text-gray-400 mb-4" />
                   <h3 className="text-lg font-semibold mb-2">Drag and drop your video</h3>
-                  <p className="text-sm text-gray-400 mb-4">MP4, WebM, or OGG. Max 100MB.</p>
+                  <p className="text-sm text-gray-400 mb-4">MP4, WebM, or OGV. Max 100MB.</p>
                   <FileUpload onSuccess={handleVideoUploadSuccess} onProgress={handleVideoProgress} />
                 </div>
               ) : (
@@ -216,20 +229,31 @@ export default function Upload() {
               </div>
 
               <div>
-                <Label>Thumbnail</Label>
+                <Label htmlFor="thumbnail">Thumbnail</Label>
                 <div className="bg-black/30 border border-gray-600 rounded-lg p-4">
                   <div className="flex items-center gap-2 text-gray-400 mb-3">
-                    <Image className="h-5 w-5" />
                     <span className="text-sm">Choose a thumbnail</span>
                   </div>
-                  <Input type="file" accept="image/*" onChange={handleThumbnailFile} />
-                  {thumbnailUploading && <p className="text-sm text-indigo-400 mt-2">Uploading thumbnail...</p>}
+                  <Input 
+                    id="thumbnail"
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleThumbnailFile} 
+                    disabled={thumbnailUploading}
+                  />
+                  {thumbnailUploading && (
+                    <p className="text-sm text-indigo-400 mt-2">Uploading thumbnail...</p>
+                  )}
                   {thumbnailUrl && (
-                    <img
-                      src={thumbnailUrl}
-                      alt="Thumbnail"
-                      className="mt-3 rounded-lg border border-gray-500 w-32 h-auto"
-                    />
+                    <div className="mt-3 relative w-32 h-20 rounded-lg border border-gray-500 overflow-hidden">
+                      <Image
+                        src={thumbnailUrl}
+                        alt="Thumbnail preview"
+                        fill
+                        className="object-cover"
+                        sizes="128px"
+                      />
+                    </div>
                   )}
                 </div>
               </div>
@@ -251,17 +275,16 @@ export default function Upload() {
 
               <Button
                 type="submit"
-                onClick={handleSubmit}
                 className="w-full rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg hover:opacity-90 px-6 py-3 disabled:opacity-50"
-                disabled={!videoUrl || uploading}
+                disabled={!videoUrl || !thumbnailUrl || uploading || thumbnailUploading}
               >
-                {uploading ? (
+                {uploading || thumbnailUploading ? (
                   <>
                     <Loader className="mr-2 h-5 w-5 animate-spin" />
-                    Uploading...
+                    {thumbnailUploading ? "Uploading Thumbnail..." : "Uploading..."}
                   </>
                 ) : (
-                  <>Post</>
+                  "Post"
                 )}
               </Button>
             </div>
