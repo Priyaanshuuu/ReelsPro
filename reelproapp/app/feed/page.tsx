@@ -7,6 +7,7 @@ import Navigation from "@/app/components/navigation";
 import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Music, User, X } from "lucide-react";
 import VideoPlayer from "@/app/components/video/page";
 import { useToast } from "@/app/hooks/use-toast";
+import Image from "next/image";
 
 type Comment = {
   user?: {
@@ -54,9 +55,10 @@ export default function FeedPage() {
       });
   }, []);
 
-  // Intersection Observer for active video
+  // Intersection Observer for active video - Fixed React hooks warning
   useEffect(() => {
     if (!reels.length) return;
+    
     const observer = new window.IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -68,11 +70,17 @@ export default function FeedPage() {
       },
       { threshold: 0.6 }
     );
-    videoRefs.current.forEach((ref) => {
+
+    // Copy the current ref values to avoid stale closure
+    const currentRefs = videoRefs.current;
+    
+    currentRefs.forEach((ref) => {
       if (ref) observer.observe(ref);
     });
+
     return () => {
-      videoRefs.current.forEach((ref) => {
+      // Use the copied ref values in cleanup
+      currentRefs.forEach((ref) => {
         if (ref) observer.unobserve(ref);
       });
     };
@@ -177,14 +185,14 @@ export default function FeedPage() {
           <div
             key={video._id}
             data-index={index}
-            ref={el => (videoRefs.current[index] = el)}
+            ref={el => { videoRefs.current[index] = el; }}
             className="min-h-screen w-full flex justify-center items-center snap-center relative"
             style={{ scrollSnapAlign: "center" }}
           >
             <div className="relative w-[360px] max-w-full aspect-[9/16] flex flex-col items-center justify-center rounded-xl overflow-hidden shadow-2xl border border-gray-700 bg-black">
               <VideoPlayer
                 video={{
-                  id: video._id,
+                  id: Number(video._id),
                   username: video.user?.name || "user",
                   date: video.date || "",
                   caption: video.caption,
@@ -208,7 +216,15 @@ export default function FeedPage() {
                     >
                       <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border border-border mr-3 overflow-hidden">
                         {video.user?.image ? (
-                          <img src={video.user.image} alt={video.user.name || "user"} className="w-10 h-10 object-cover rounded-full" />
+                          <div className="relative w-10 h-10">
+                            <Image 
+                              src={video.user.image} 
+                              alt={video.user.name || "user"} 
+                              fill
+                              className="object-cover rounded-full"
+                              sizes="40px"
+                            />
+                          </div>
                         ) : (
                           <User className="h-5 w-5 text-primary-foreground" />
                         )}
@@ -318,7 +334,15 @@ export default function FeedPage() {
                   <div key={idx} className="flex items-start gap-2 mb-3">
                     <div className="w-8 h-8 rounded-full bg-primary/30 flex items-center justify-center overflow-hidden">
                       {comment.user?.image ? (
-                        <img src={comment.user.image} alt={comment.user.name || "User"} className="w-8 h-8 object-cover rounded-full" />
+                        <div className="relative w-8 h-8">
+                          <Image 
+                            src={comment.user.image} 
+                            alt={comment.user.name || "User"} 
+                            fill
+                            className="object-cover rounded-full"
+                            sizes="32px"
+                          />
+                        </div>
                       ) : (
                         <User className="h-4 w-4 text-primary-foreground" />
                       )}
