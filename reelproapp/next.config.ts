@@ -1,4 +1,4 @@
-// next.config.ts - Complete production ready config
+// next.config.ts
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -24,16 +24,16 @@ const nextConfig: NextConfig = {
       }
     ]
   },
-  typescript: {
-    ignoreBuildErrors: true, // ✅ Production deployment ke liye
-  },
-  eslint: {
-    ignoreDuringBuilds: true, // ✅ Build errors avoid karne ke liye
-  },
-  // ✅ CSS optimization
+  // ✅ CSS optimization settings
   swcMinify: true,
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production' ? true : false,
+    removeConsole: false, // Keep console logs for debugging
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
   },
 };
 
