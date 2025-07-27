@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import FileUpload from "../components/file-upload/page";
+import FileUpload from "../components/file-upload/index";
 import Navigation from "../components/navigation";
 import { Film, X, Loader } from "lucide-react";
 import { Label } from "../components/ui/label";
